@@ -1,0 +1,1259 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "TimeLog REST API — Organization",
+    "version": "v1, v2",
+    "description": "The Organization surface of the TimeLog REST API, reconstructed from source annotations, action signatures, live-captured payloads and published documentation.\n\nEvery field is traceable to one of those sources. Where a contract could not be established it is marked as unknown rather than guessed.\n\nResponses use the TAF envelope: single resources are under `Properties`, collections under `Entities[].Properties`."
+  },
+  "servers": [
+    {
+      "url": "https://app{instance}.timelog.com/{account}/api",
+      "description": "Your TimeLog site. The URL shown is a placeholder — in the API Explorer, double-click it and paste your own site's base URL, e.g. `https://app3.timelog.com/acme/api`. It is remembered as you move between endpoints, so you only do this once.",
+      "variables": {
+        "instance": {
+          "default": "NN",
+          "description": "The number in your TimeLog address: `app3.timelog.com` is instance `3`."
+        },
+        "account": {
+          "default": "YOUR-ACCOUNT",
+          "description": "The segment after the host: `app3.timelog.com/acme/` is account `acme`."
+        }
+      }
+    }
+  ],
+  "security": [
+    {
+      "personalAccessToken": []
+    }
+  ],
+  "paths": {
+    "/v1/department": {
+      "get": {
+        "operationId": "DepartmentController_GetAll_v1",
+        "responses": {
+          "200": {
+            "description": "A list of departments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "TAF list envelope. Each result is an entry in `Entities`, with the resource under its `Properties`. `Entities` is omitted entirely when the result set is empty.",
+                  "properties": {
+                    "Properties": {
+                      "$ref": "#/components/schemas/TafPagingProperties"
+                    },
+                    "Entities": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "Properties": {
+                            "$ref": "#/components/schemas/DepartmentApiReadModel"
+                          },
+                          "Links": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/TafLink"
+                            }
+                          },
+                          "Actions": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/TafAction"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "Links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TafLink"
+                      }
+                    },
+                    "Actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TafAction"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid authentication token"
+          }
+        },
+        "summary": "Get all departments",
+        "description": "Get all departments",
+        "externalDocs": {
+          "url": "https://api.timelog.com/rest/method/department_getall",
+          "description": "Published reference"
+        },
+        "tags": [
+          "Departments"
+        ]
+      }
+    },
+    "/v1/employee-projection/get-in-period": {
+      "get": {
+        "operationId": "EmployeeProjectionController_GetInPeriod_v1",
+        "responses": {
+          "200": {
+            "description": "A list of employee projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "TAF list envelope. Each result is an entry in `Entities`, with the resource under its `Properties`. `Entities` is omitted entirely when the result set is empty.",
+                  "properties": {
+                    "Properties": {
+                      "$ref": "#/components/schemas/TafPagingProperties"
+                    },
+                    "Entities": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "Properties": {
+                            "$ref": "#/components/schemas/EmployeeProjectionApiReadModel"
+                          },
+                          "Links": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/TafLink"
+                            }
+                          },
+                          "Actions": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/TafAction"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "Links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TafLink"
+                      }
+                    },
+                    "Actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TafAction"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "summary": "Get a list of employee projection in the period",
+        "description": "Get a list of employee projection in the period",
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Start of the period"
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "End of the period"
+          },
+          {
+            "name": "includeAllEmployees",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Optional parameter. Default value is FALSE."
+          }
+        ],
+        "externalDocs": {
+          "url": "https://api.timelog.com/rest/method/employeeprojection_getinperiod",
+          "description": "Published reference"
+        },
+        "tags": [
+          "Employee projections"
+        ]
+      }
+    },
+    "/v1/legal-entity": {
+      "get": {
+        "operationId": "LegalEntityController_GetAll_v1",
+        "responses": {
+          "200": {
+            "description": "A list of legal entities",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "TAF list envelope. Each result is an entry in `Entities`, with the resource under its `Properties`. `Entities` is omitted entirely when the result set is empty.",
+                  "properties": {
+                    "Properties": {
+                      "$ref": "#/components/schemas/TafPagingProperties"
+                    },
+                    "Entities": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "Properties": {
+                            "$ref": "#/components/schemas/LegalEntityApiReadModel"
+                          },
+                          "Links": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/TafLink"
+                            }
+                          },
+                          "Actions": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/TafAction"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "Links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TafLink"
+                      }
+                    },
+                    "Actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TafAction"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid authentication token"
+          }
+        },
+        "summary": "Get all legal entities",
+        "description": "Get all legal entities",
+        "externalDocs": {
+          "url": "https://api.timelog.com/rest/method/legalentity_getall",
+          "description": "Published reference"
+        },
+        "tags": [
+          "Legal entities"
+        ]
+      }
+    },
+    "/v1/legal-entity/system": {
+      "get": {
+        "operationId": "LegalEntityController_SystemLegalEntity_v1",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "TAF single-object envelope. The resource is under `Properties`.",
+                  "properties": {
+                    "Links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TafLink"
+                      }
+                    },
+                    "Actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TafAction"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid authentication token"
+          }
+        },
+        "description": "Not documented in source or in the published reference. The request and response contracts below are derived from live-captured payloads.",
+        "externalDocs": {
+          "url": "https://api.timelog.com/rest/method/legalentity_systemlegalentity",
+          "description": "Published reference"
+        },
+        "summary": "Get the system legal entity",
+        "tags": [
+          "Legal entities"
+        ]
+      }
+    },
+    "/v1/legal-entity/{legalEntityId}": {
+      "get": {
+        "operationId": "LegalEntityController_GetById_v1",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "TAF single-object envelope. The resource is under `Properties`.",
+                  "properties": {
+                    "Links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TafLink"
+                      }
+                    },
+                    "Actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TafAction"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Invalid authentication token"
+          }
+        },
+        "description": "Not documented in source or in the published reference. The request and response contracts below are derived from live-captured payloads.",
+        "parameters": [
+          {
+            "name": "legalEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "externalDocs": {
+          "url": "https://api.timelog.com/rest/method/legalentity_getbyid",
+          "description": "Published reference"
+        },
+        "summary": "Get a legal entity by identifier",
+        "tags": [
+          "Legal entities"
+        ]
+      }
+    },
+    "/v1/user": {
+      "get": {
+        "operationId": "UserController_GetAll_v1",
+        "responses": {
+          "200": {
+            "description": "A list of user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "TAF list envelope. Each result is an entry in `Entities`, with the resource under its `Properties`. `Entities` is omitted entirely when the result set is empty.",
+                  "properties": {
+                    "Properties": {
+                      "$ref": "#/components/schemas/TafPagingProperties"
+                    },
+                    "Entities": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "Properties": {
+                            "$ref": "#/components/schemas/UserApiReadModel"
+                          },
+                          "Links": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/TafLink"
+                            }
+                          },
+                          "Actions": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/TafAction"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "Links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TafLink"
+                      }
+                    },
+                    "Actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TafAction"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid authentication token"
+          }
+        },
+        "summary": "Get a list of all users in the organization",
+        "description": "Get a list of all users in the organization",
+        "externalDocs": {
+          "url": "https://api.timelog.com/rest/method/user_getall",
+          "description": "Published reference"
+        },
+        "tags": [
+          "Users"
+        ]
+      },
+      "put": {
+        "operationId": "UserController_Update_v1",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "null",
+                  "description": "Empty body. The action returns `TafSuccessResult()`, which serialises `default(TReadModel)` — literal `null`."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid authentication token"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Update user information",
+        "description": "Update user information",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdateModel"
+              }
+            }
+          }
+        },
+        "externalDocs": {
+          "url": "https://api.timelog.com/rest/method/user_update",
+          "description": "Published reference"
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/user/create": {
+      "post": {
+        "operationId": "UserController_Create_v1",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "TAF single-object envelope. The resource is under `Properties`.",
+                  "properties": {
+                    "Properties": {
+                      "$ref": "#/components/schemas/UserApiCreateModel"
+                    },
+                    "Links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TafLink"
+                      }
+                    },
+                    "Actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TafAction"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Invalid authentication token"
+          },
+          "500": {
+            "description": "User could not be created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseError"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create new user",
+        "description": "Create new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserApiCreateModel"
+              }
+            }
+          }
+        },
+        "externalDocs": {
+          "url": "https://api.timelog.com/rest/method/user_create",
+          "description": "Published reference"
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/user/me": {
+      "get": {
+        "operationId": "UserController_GetCurrentUser_v1",
+        "responses": {
+          "200": {
+            "description": "A user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "TAF single-object envelope. The resource is under `Properties`.",
+                  "properties": {
+                    "Properties": {
+                      "$ref": "#/components/schemas/UserApiReadModel"
+                    },
+                    "Links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TafLink"
+                      }
+                    },
+                    "Actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TafAction"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid authentication token"
+          }
+        },
+        "summary": "Get the current user information",
+        "description": "Get the current user information",
+        "externalDocs": {
+          "url": "https://api.timelog.com/rest/method/user_getcurrentuser",
+          "description": "Published reference"
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/user/validate-new-user": {
+      "post": {
+        "operationId": "UserController_ValidateNewUser_v1",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "null",
+                  "description": "Empty body. The action returns `TafSuccessResult()`, which serialises `default(TReadModel)` — literal `null`."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Invalid authentication token"
+          },
+          "500": {
+            "description": "User could not be validated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseError"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Validate new user",
+        "description": "Validate new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserApiCreateModel"
+              }
+            }
+          }
+        },
+        "externalDocs": {
+          "url": "https://api.timelog.com/rest/method/user_validatenewuser",
+          "description": "Published reference"
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/user/{id}": {
+      "get": {
+        "operationId": "UserController_GetByID_v1",
+        "responses": {
+          "200": {
+            "description": "A user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "TAF single-object envelope. The resource is under `Properties`.",
+                  "properties": {
+                    "Properties": {
+                      "$ref": "#/components/schemas/UserApiReadModel"
+                    },
+                    "Links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TafLink"
+                      }
+                    },
+                    "Actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TafAction"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid authentication token"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "No user matching the identifier was found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseError"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get a user with the user identifier",
+        "description": "Get a user with the user identifier",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "User identifier"
+          }
+        ],
+        "externalDocs": {
+          "url": "https://api.timelog.com/rest/method/user_getbyid",
+          "description": "Published reference"
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v2/users/me": {
+      "get": {
+        "operationId": "UsersController_GetCurrentUser_v2",
+        "responses": {
+          "200": {
+            "description": "Current user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "TAF single-object envelope. The resource is under `Properties`.",
+                  "properties": {
+                    "Properties": {
+                      "$ref": "#/components/schemas/UsersApiReadModel"
+                    },
+                    "Links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TafLink"
+                      }
+                    },
+                    "Actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TafAction"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid authentication token"
+          }
+        },
+        "description": "Not documented in source or in the published reference. The request and response contracts below are derived from live-captured payloads.",
+        "summary": "Get the current user information (v2)",
+        "tags": [
+          "Users"
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "personalAccessToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "PAT",
+        "description": "Personal Access Token, sent as `Authorization: Bearer <token>`.\n\n**Getting one.** In TimeLog go to Settings → Personal settings → Personal access tokens → *Click here to manage the personal access tokens*. If that section is not visible, your TimeLog administrator must grant your role the Integration privilege for personal access tokens (Security → Roles → Edit). Tokens can be set to expire after up to two years and are shown once.\n\n**Scope.** A PAT acts as the user who created it and carries exactly that user's permissions — there is no narrower scope.\n\n**Not interchangeable.** Reporting API credentials (Site Code, API ID, API Password) do not work against the REST API.\n\n**Set the base URL first.** The URL shown above is a placeholder and will not reach any site. In the API Explorer, double-click it and paste your own — `https://app3.timelog.com/acme/api` for account `acme` on instance 3. It is remembered as you move between endpoints. See *Set up your site* for a field that builds the URL for you.\n\n**Check it works.** `GET /v1/user/me` returns 200 when the token, instance and account are all correct. A 401 means one of the three is wrong; TimeLog does not say which."
+      }
+    },
+    "schemas": {
+      "TafLink": {
+        "type": "object",
+        "description": "A hypermedia link. `Rel` names the relationship, `Href` is the absolute URL.",
+        "properties": {
+          "Href": {
+            "type": "string",
+            "format": "uri"
+          },
+          "Rel": {
+            "type": "string"
+          },
+          "Actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TafAction"
+            }
+          }
+        },
+        "required": [
+          "Href",
+          "Rel"
+        ]
+      },
+      "TafActionField": {
+        "type": "object",
+        "description": "One field of a TAF action's payload.",
+        "properties": {
+          "Name": {
+            "type": "string"
+          },
+          "Type": {
+            "type": "string"
+          },
+          "Value": {
+            "description": "Free-form JSON value."
+          }
+        }
+      },
+      "TafAction": {
+        "type": "object",
+        "description": "An operation the caller may perform next. `Method` is the `TafRequestMethods` enum, serialised as an integer.",
+        "properties": {
+          "Name": {
+            "type": "string"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Method": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Href": {
+            "type": "string",
+            "format": "uri"
+          },
+          "Type": {
+            "type": "string"
+          },
+          "Fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TafActionField"
+            }
+          }
+        }
+      },
+      "TafPagingProperties": {
+        "type": "object",
+        "description": "Paging counters returned on list responses. Serialised as strings, as observed in the live-capture corpus.",
+        "properties": {
+          "PageNumber": {
+            "type": "string"
+          },
+          "TotalPage": {
+            "type": "string"
+          },
+          "TotalRecord": {
+            "type": "string"
+          }
+        }
+      },
+      "DepartmentApiReadModel": {
+        "type": "object",
+        "properties": {
+          "DepartmentID": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Gets or sets the Department identifier."
+          },
+          "Name": {
+            "type": "string",
+            "description": "Gets or sets the name."
+          },
+          "IsActive": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether this instance is active."
+          },
+          "No": {
+            "type": "string",
+            "description": "Gets or sets the No."
+          },
+          "ID": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Gets or sets the identifier."
+          },
+          "ParentID": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Gets or sets the Parent identifier."
+          },
+          "ManagerEmployeeID": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Gets or sets the Manager Employee identifier."
+          }
+        }
+      },
+      "UserApiReadModel": {
+        "type": "object",
+        "description": "No serialisable properties found in source."
+      },
+      "EmployeeProjectionApiReadModel": {
+        "type": "object",
+        "properties": {
+          "ProjectionID": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Gets or sets the projection identifier."
+          },
+          "UserID": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Gets or sets the user identifier."
+          },
+          "User": {
+            "$ref": "#/components/schemas/UserApiReadModel",
+            "description": "Gets or sets the user."
+          },
+          "Date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Gets or sets the date."
+          },
+          "NormalWorkingTimeDayOrder": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Gets or sets the normal working time day order."
+          },
+          "NormalWorkingHours": {
+            "type": "number",
+            "format": "double",
+            "description": "Gets or sets the normal working hours."
+          },
+          "NormalWorkingMinutes": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Gets or sets the normal working minutes."
+          },
+          "IsClosed": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether this instance is closed."
+          },
+          "IsInClosedAccountingPeriod": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether this instance is in closed accounting period."
+          },
+          "HasRejectedTime": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether this instance has rejected time."
+          },
+          "IsApproved": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether this instance is approved."
+          },
+          "ID": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Gets or sets the identifier."
+          }
+        }
+      },
+      "LegalEntityApiReadModel": {
+        "type": "object",
+        "properties": {
+          "LegalEntityID": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Gets or sets the Legal Entity identifier."
+          },
+          "Name": {
+            "type": "string",
+            "description": "Gets or sets the name."
+          },
+          "IsActive": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether this instance is active."
+          },
+          "ID": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Gets or sets the identifier."
+          },
+          "CurrencyISO": {
+            "type": "string",
+            "description": "Gets or sets the Currency ISO."
+          },
+          "CountryISO": {
+            "type": "string",
+            "description": "Gets or sets the Country ISO."
+          },
+          "IsSystemLegalEntity": {
+            "type": "boolean",
+            "description": "Gets or sets a value indicating whether this instance is the system default."
+          }
+        }
+      },
+      "UserUpdateModel": {
+        "type": "object",
+        "description": "No serialisable properties found in source."
+      },
+      "Language": {
+        "type": "integer",
+        "format": "int32",
+        "enum": [
+          1,
+          2,
+          4,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21
+        ],
+        "x-enum-varnames": [
+          "Danish",
+          "English",
+          "Swedish",
+          "Norwegian",
+          "German",
+          "Dutch",
+          "French",
+          "Finnish",
+          "Russian",
+          "Swiss"
+        ]
+      },
+      "UserTypes": {
+        "type": "integer",
+        "format": "int32",
+        "enum": [
+          -1,
+          0,
+          1,
+          2,
+          3
+        ],
+        "x-enum-varnames": [
+          "All",
+          "Employee",
+          "ApiUser",
+          "ExternalRessource",
+          "AnonymizedEmployee"
+        ]
+      },
+      "IUserProfile": {
+        "type": "object",
+        "description": "Message of interface IUserProfile No serialisable properties found in source."
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Gets the Id of the user (as integer)"
+          },
+          "UserName": {
+            "type": "string",
+            "description": "Gets the user name of the user The user name is used for authentication"
+          },
+          "IsActive": {
+            "type": "boolean",
+            "description": "Gets a value indicating whether the user is active or not"
+          },
+          "IsLocked": {
+            "type": "boolean",
+            "description": "Gets a value indicating whether the user is locked or not"
+          },
+          "LastFailed": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Gets a value indicating the last date the authentication attempt failed"
+          },
+          "NumberOfFailedAttempts": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Gets the current number of failed attempts"
+          },
+          "PasswordSalt": {
+            "type": "string",
+            "description": "Gets the password salt, used for authentication"
+          },
+          "PasswordHash": {
+            "type": "string",
+            "description": "Gets the password hash, used for authentication"
+          },
+          "Initials": {
+            "type": "string",
+            "description": "Gets the initials of the user name. it is not used for authentication anymore"
+          },
+          "FirstName": {
+            "type": "string",
+            "description": "Gets the first name of the user"
+          },
+          "LastName": {
+            "type": "string",
+            "description": "Gets the last name of the user"
+          },
+          "Language": {
+            "$ref": "#/components/schemas/Language",
+            "description": "Gets the language of the user TODO: should be moved to user profile"
+          },
+          "Comment": {
+            "type": "string",
+            "description": "Gets the comments/description of the user"
+          },
+          "EmployeeType": {
+            "$ref": "#/components/schemas/UserTypes",
+            "description": "Gets the system employee type of the user"
+          },
+          "IsSystemUser": {
+            "type": "boolean",
+            "description": "Gets a value indicating whether the user is a system user or not"
+          },
+          "UserProfile": {
+            "$ref": "#/components/schemas/IUserProfile",
+            "description": "Gets the profile of the user"
+          },
+          "MedarbejderId": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Gets the old Medarbejder ID of the user"
+          },
+          "DepartmentName": {
+            "type": "string",
+            "description": "Gets the department name of the user TODO: Should be removed"
+          },
+          "DepartmentID": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Gets the Department id of the user TODO: should be removed"
+          }
+        }
+      },
+      "UserApiCreateModel": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/User"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "ResponseError": {
+        "type": "object",
+        "properties": {
+          "Code": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Gets the code."
+          },
+          "Details": {
+            "type": "array",
+            "items": {
+              "description": "Free-form JSON value."
+            },
+            "description": "Gets the details."
+          },
+          "Message": {
+            "type": "string",
+            "description": "Gets the message."
+          },
+          "Parameters": {
+            "type": "string",
+            "description": "Gets the parameters."
+          },
+          "Url": {
+            "type": "string",
+            "description": "Gets the URL."
+          },
+          "DeveloperNote": {
+            "description": "Free-form JSON value."
+          }
+        }
+      },
+      "UsersApiReadModel": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Gets or sets the user identifier."
+          },
+          "Id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Gets or sets the identifier."
+          },
+          "FullName": {
+            "type": "string",
+            "description": "Gets or sets the full name."
+          },
+          "FirstName": {
+            "type": "string",
+            "description": "Gets or sets the first name."
+          },
+          "LastName": {
+            "type": "string",
+            "description": "Gets or sets the last name."
+          },
+          "Initials": {
+            "type": "string",
+            "description": "Gets or sets the initials."
+          },
+          "Email": {
+            "type": "string",
+            "description": "Gets or sets if the user email."
+          },
+          "IsActive": {
+            "type": "boolean",
+            "description": "Gets or sets if the user is active."
+          },
+          "UserType": {
+            "$ref": "#/components/schemas/UserTypes",
+            "description": "Gets or sets the user type."
+          },
+          "ProfilePicture": {
+            "type": "string",
+            "description": "Gets or sets a URL to the user's profile picture"
+          },
+          "LegalEntityId": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Gets or sets the legal entity ID of the user"
+          },
+          "LegalEntityName": {
+            "type": "string",
+            "description": "Gets or sets the legal entity name of the user"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Departments",
+      "description": "The department tree of the organization."
+    },
+    {
+      "name": "Employee projections",
+      "description": "Per-employee expected working time over a period."
+    },
+    {
+      "name": "Legal entities",
+      "description": "The legal entities a TimeLog site is divided into."
+    },
+    {
+      "name": "Users",
+      "description": "Users of the organization, and the caller's own identity."
+    }
+  ]
+}

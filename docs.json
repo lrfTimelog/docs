@@ -16,6 +16,7 @@
           {
             "group": "Get started",
             "icon": "rocket",
+            "public": true,
             "pages": [
               "index",
               "api-reference/authentication",
@@ -26,6 +27,7 @@
           {
             "group": "Departments",
             "icon": "sitemap",
+            "public": true,
             "pages": [
               "api-reference/departments/list"
             ]
@@ -40,6 +42,7 @@
           {
             "group": "Legal entities",
             "icon": "building-columns",
+            "public": true,
             "pages": [
               "api-reference/legal-entities/list",
               "api-reference/legal-entities/get-system",
@@ -102,8 +105,10 @@
   },
   "description": "TimeLog developer documentation",
   "api": {
+    "openapi": "api-reference/organization.json",
     "playground": {
-      "display": "interactive"
+      "display": "interactive",
+      "proxy": true
     },
     "examples": {
       "languages": [
