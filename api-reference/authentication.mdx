@@ -1,0 +1,120 @@
+---
+title: "Authentication"
+description: "Build your base URL, create a personal access token, verify both work"
+icon: "key"
+---
+
+Every request needs two things that are specific to your site: the **base URL** and a
+**personal access token**.
+
+## 1. Build your base URL
+
+The REST API has no shared host. Your TimeLog address contains both parts of the base
+URL. For a site at `https://app3.timelog.com/acme/`:
+
+| Part | Where it comes from | Example |
+| --- | --- | --- |
+| `instance` | The number in the host | `3` |
+| `account` | The path segment after the host | `acme` |
+
+Which assembles to:
+
+```
+https://app{instance}.timelog.com/{account}/api
+```
+
+```bash Example
+https://app3.timelog.com/acme/api
+```
+
+Every path in this reference is relative to that. `GET /v1/user/me` means
+`GET https://app3.timelog.com/acme/api/v1/user/me`.
+
+## 2. Create a personal access token
+
+In TimeLog, go to **Settings → Personal settings → Personal access tokens** and choose
+*Click here to manage the personal access tokens*.
+
+<Warning>
+  If that section is not visible, your TimeLog administrator has to grant your role the
+  Integration privilege for personal access tokens, under **Security → Roles → Edit**.
+  It is not enabled for every role.
+</Warning>
+
+A token can be set to expire after up to two years and is **shown only once**. Store it
+where you keep other secrets — there is no way to read it back.
+
+### What a token can do
+
+A token acts as the user who created it and carries exactly that user's permissions.
+There is no narrower scope.
+
+<Warning>
+  A token created from an administrator account is an administrator credential. If an
+  integration only needs to read departments, create its token from a service user with
+  only that access — not from your own account.
+</Warning>
+
+Reporting API credentials — Site Code, API ID, API Password — do **not** work against the
+REST API.
+
+## 3. Send it
+
+The token goes in the `Authorization` header as a bearer token.
+
+<ParamField header="Authorization" type="string" required>
+  `Bearer <your personal access token>`
+</ParamField>
+
+<CodeGroup>
+
+```bash cURL
+curl https://app3.timelog.com/acme/api/v1/user/me \
+  -H "Authorization: Bearer $TIMELOG_TOKEN"
+```
+
+```csharp C#
+var http = new HttpClient { BaseAddress = new Uri("https://app3.timelog.com/acme/api/") };
+http.DefaultRequestHeaders.Authorization =
+    new AuthenticationHeaderValue("Bearer", Environment.GetEnvironmentVariable("TIMELOG_TOKEN"));
+
+var response = await http.GetAsync("v1/user/me");
+```
+
+```python Python
+import os
+import httpx
+
+client = httpx.Client(
+    base_url="https://app3.timelog.com/acme/api",
+    headers={"Authorization": f"Bearer {os.environ['TIMELOG_TOKEN']}"},
+)
+
+response = client.get("/v1/user/me")
+```
+
+```javascript JavaScript
+const response = await fetch("https://app3.timelog.com/acme/api/v1/user/me", {
+  headers: { Authorization: `Bearer ${process.env.TIMELOG_TOKEN}` },
+});
+```
+
+</CodeGroup>
+
+## 4. Verify
+
+[Get the current user](/api-reference/users/get-current) is the cheapest call in the API
+and it validates all three inputs at once.
+
+| Result | Meaning |
+| --- | --- |
+| `200` | You are set up. Your user is under `Properties`. |
+| `401` | The token, the instance **or** the account is wrong. |
+| Cannot reach the host | The instance number is wrong, or the URL is still a placeholder. |
+
+<Warning>
+  TimeLog returns the same `401` whether the token is invalid, the instance is wrong or
+  the account name is wrong. Check the base URL character by character before concluding
+  the token is bad — a wrong account name is the most common cause and looks identical to
+  an expired token.
+</Warning>

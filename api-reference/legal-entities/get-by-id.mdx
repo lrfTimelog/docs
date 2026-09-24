@@ -1,0 +1,116 @@
+---
+title: "Get a legal entity by ID"
+description: "Retrieve a single legal entity by its identifier"
+---
+
+```http
+GET /v1/legal-entity/{legalEntityId}
+```
+
+Returns one legal entity by its `LegalEntityID`. Identifiers come from
+[Get all legal entities](/api-reference/legal-entities/list).
+
+## Authorization
+
+<ParamField header="Authorization" type="string" required>
+  `Bearer <personal access token>`. See [Authentication](/api-reference/authentication).
+</ParamField>
+
+## Path parameters
+
+<ParamField path="legalEntityId" type="integer" required>
+  The `LegalEntityID` of the entity to retrieve. A 32-bit integer — not the `ID` GUID.
+</ParamField>
+
+## Response
+
+`200` — a [single-resource envelope](/api-reference/response-format#single-resource).
+
+<ResponseField name="Properties" type="object">
+  The legal entity.
+</ResponseField>
+
+<ResponseField name="Links" type="TafLink[]">
+</ResponseField>
+
+<ResponseField name="Actions" type="TafAction[]">
+</ResponseField>
+
+<Warning>
+  **The `Properties` payload is not specified in the API contract.** The envelope is
+  documented; the resource inside it is not. Observed responses match the
+  `LegalEntityApiReadModel` from
+  [Get all legal entities](/api-reference/legal-entities/list), but that is an
+  observation, not a guarantee.
+
+  For a shape you can bind to, use the list endpoint and select by `LegalEntityID`. On a
+  site with a handful of entities that is one call instead of one per entity anyway.
+</Warning>
+
+## Errors
+
+| Code | Cause |
+| --- | --- |
+| `400` | `legalEntityId` is missing or not an integer. |
+| `401` | Invalid authentication token, wrong instance, or wrong account. See [Errors](/api-reference/errors). |
+
+<Note>
+  There is no documented `404`. An unknown-but-well-formed identifier is not guaranteed to
+  produce one — check that `Properties` is present before using it, rather than relying on
+  the status code alone.
+</Note>
+
+<RequestExample>
+
+```bash cURL
+curl https://app3.timelog.com/acme/api/v1/legal-entity/2 \
+  -H "Authorization: Bearer $TIMELOG_TOKEN"
+```
+
+```csharp C#
+var response = await http.GetAsync("v1/legal-entity/2");
+var envelope = await response.Content.ReadFromJsonAsync<TafSingle<LegalEntity>>();
+
+if (envelope?.Properties is null)
+    throw new InvalidOperationException("Legal entity 2 was not returned.");
+```
+
+```python Python
+response = client.get("/v1/legal-entity/2")
+response.raise_for_status()
+
+entity = response.json().get("Properties")
+if not entity:
+    raise LookupError("Legal entity 2 was not returned")
+```
+
+```javascript JavaScript
+const response = await fetch(`${baseUrl}/v1/legal-entity/2`, {
+  headers: { Authorization: `Bearer ${token}` },
+});
+
+const { Properties } = await response.json();
+if (!Properties) throw new Error("Legal entity 2 was not returned");
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json 200
+{
+  "Properties": {
+    "LegalEntityID": 2,
+    "ID": "4d5e6f7a-8b9c-4d0e-1f2a-3b4c5d6e7f8a",
+    "Name": "Acme Sverige AB",
+    "IsActive": true,
+    "CurrencyISO": "SEK",
+    "CountryISO": "SE",
+    "IsSystemLegalEntity": false
+  },
+  "Links": [],
+  "Actions": []
+}
+```
+
+</ResponseExample>

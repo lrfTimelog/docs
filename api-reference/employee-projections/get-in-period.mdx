@@ -1,0 +1,226 @@
+---
+title: "Get projections in a period"
+sidebarTitle: "Get projections in a period"
+description: "Expected working time per employee, per day, across a date range"
+---
+
+```http
+GET /v1/employee-projection/get-in-period
+```
+
+Returns one record per employee per day in the requested period, describing the working
+time that employee is **expected** to register — not what they actually registered. This
+is the denominator for utilisation and time-compliance reporting, and the source for
+planned-capacity calculations.
+
+Each record also carries the approval and accounting-period state for that day, which is
+what tells you whether the day is still open to change.
+
+## Authorization
+
+<ParamField header="Authorization" type="string" required>
+  `Bearer <personal access token>`. See [Authentication](/api-reference/authentication).
+</ParamField>
+
+## Query parameters
+
+<ParamField query="startDate" type="string" required>
+  Start of the period, as an ISO 8601 date-time. Example: `2026-09-01T00:00:00`.
+</ParamField>
+
+<ParamField query="endDate" type="string" required>
+  End of the period, as an ISO 8601 date-time. Example: `2026-09-30T00:00:00`.
+</ParamField>
+
+<ParamField query="includeAllEmployees" type="boolean" default="false">
+  When `true`, includes employees outside the caller's normal scope. Defaults to `false`.
+</ParamField>
+
+<Warning>
+  The response is one row **per employee per day**. A month across 200 employees is on the
+  order of 6,000 records. Request the narrowest period you need, and page through long
+  ranges month by month rather than asking for a year at once.
+</Warning>
+
+## Response
+
+`200` — a [collection envelope](/api-reference/response-format#collection).
+
+<ResponseField name="Entities" type="object[]">
+  One entry per employee per day. Omitted entirely if the period returns nothing.
+
+  <Expandable title="Properties" defaultOpen>
+    <ResponseField name="ProjectionID" type="integer">
+      Identifier of this projection record.
+    </ResponseField>
+    <ResponseField name="ID" type="string">
+      GUID form of the identifier.
+    </ResponseField>
+    <ResponseField name="UserID" type="integer">
+      The employee this record belongs to.
+    </ResponseField>
+    <ResponseField name="User" type="object">
+      The embedded user. See the caveat below — prefer `UserID` and a separate lookup.
+    </ResponseField>
+    <ResponseField name="Date" type="string">
+      The day this record covers, as a date-time.
+    </ResponseField>
+    <ResponseField name="NormalWorkingHours" type="number">
+      Expected working time for the day, in hours. `0` on a non-working day.
+    </ResponseField>
+    <ResponseField name="NormalWorkingMinutes" type="integer">
+      The same figure in minutes. Use this one for arithmetic — it avoids the floating
+      point drift that accumulates when summing `NormalWorkingHours` across a month.
+    </ResponseField>
+    <ResponseField name="NormalWorkingTimeDayOrder" type="integer">
+      Position of the day within the employee's working-time pattern.
+    </ResponseField>
+    <ResponseField name="IsClosed" type="boolean">
+      Whether the day is closed for further registration.
+    </ResponseField>
+    <ResponseField name="IsInClosedAccountingPeriod" type="boolean">
+      Whether the day falls in a closed accounting period. A day can be open but sit in a
+      closed period — check both before attempting a write elsewhere in the API.
+    </ResponseField>
+    <ResponseField name="IsApproved" type="boolean">
+      Whether the day's registrations are approved.
+    </ResponseField>
+    <ResponseField name="HasRejectedTime" type="boolean">
+      Whether the day contains rejected registrations awaiting correction.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Errors
+
+| Code | Cause |
+| --- | --- |
+| `404` | No projections exist for the requested period. |
+
+<Note>
+  This is the only Organization endpoint with **no documented `401`**. That is a gap in
+  the contract, not a guarantee of anonymous access — handle `401` anyway. See
+  [Errors](/api-reference/errors).
+</Note>
+
+<Warning>
+  The embedded `User` object has **no documented fields**. Read `UserID` and resolve it
+  through [Get a user by ID](/api-reference/users/get-by-id) rather than binding to the
+  embedded shape.
+</Warning>
+
+<RequestExample>
+
+```bash cURL
+curl -G https://app3.timelog.com/acme/api/v1/employee-projection/get-in-period \
+  -H "Authorization: Bearer $TIMELOG_TOKEN" \
+  --data-urlencode "startDate=2026-09-01T00:00:00" \
+  --data-urlencode "endDate=2026-09-30T00:00:00" \
+  --data-urlencode "includeAllEmployees=false"
+```
+
+```csharp C#
+var query = QueryString.Create(new Dictionary<string, string>
+{
+    ["startDate"] = "2026-09-01T00:00:00",
+    ["endDate"] = "2026-09-30T00:00:00",
+    ["includeAllEmployees"] = "false",
+});
+
+var response = await http.GetAsync($"v1/employee-projection/get-in-period{query}");
+var envelope = await response.Content.ReadFromJsonAsync<TafList<EmployeeProjection>>();
+
+// Sum in minutes, not hours.
+var expectedMinutes = envelope.Entities.Sum(e => e.Properties.NormalWorkingMinutes);
+```
+
+```python Python
+response = client.get(
+    "/v1/employee-projection/get-in-period",
+    params={
+        "startDate": "2026-09-01T00:00:00",
+        "endDate": "2026-09-30T00:00:00",
+        "includeAllEmployees": False,
+    },
+)
+response.raise_for_status()
+
+rows = [e["Properties"] for e in response.json().get("Entities", [])]
+
+expected_minutes = {}
+for row in rows:
+    expected_minutes[row["UserID"]] = (
+        expected_minutes.get(row["UserID"], 0) + row["NormalWorkingMinutes"]
+    )
+```
+
+```javascript JavaScript
+const params = new URLSearchParams({
+  startDate: "2026-09-01T00:00:00",
+  endDate: "2026-09-30T00:00:00",
+  includeAllEmployees: "false",
+});
+
+const response = await fetch(
+  `${baseUrl}/v1/employee-projection/get-in-period?${params}`,
+  { headers: { Authorization: `Bearer ${token}` } },
+);
+
+const { Entities = [] } = await response.json();
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json 200
+{
+  "Properties": {
+    "PageNumber": "1",
+    "TotalPage": "1",
+    "TotalRecord": "2"
+  },
+  "Entities": [
+    {
+      "Properties": {
+        "ProjectionID": 884512,
+        "ID": "9a8b7c6d-5e4f-4a3b-2c1d-0e9f8a7b6c5d",
+        "UserID": 1234,
+        "User": {},
+        "Date": "2026-09-01T00:00:00",
+        "NormalWorkingTimeDayOrder": 1,
+        "NormalWorkingHours": 7.5,
+        "NormalWorkingMinutes": 450,
+        "IsClosed": false,
+        "IsInClosedAccountingPeriod": false,
+        "HasRejectedTime": false,
+        "IsApproved": false
+      },
+      "Links": [],
+      "Actions": []
+    },
+    {
+      "Properties": {
+        "ProjectionID": 884513,
+        "ID": "8b7c6d5e-4f3a-4b2c-1d0e-9f8a7b6c5d4e",
+        "UserID": 1234,
+        "User": {},
+        "Date": "2026-09-05T00:00:00",
+        "NormalWorkingTimeDayOrder": 5,
+        "NormalWorkingHours": 0,
+        "NormalWorkingMinutes": 0,
+        "IsClosed": true,
+        "IsInClosedAccountingPeriod": false,
+        "HasRejectedTime": false,
+        "IsApproved": true
+      },
+      "Links": [],
+      "Actions": []
+    }
+  ],
+  "Links": [],
+  "Actions": []
+}
+```
+
+</ResponseExample>

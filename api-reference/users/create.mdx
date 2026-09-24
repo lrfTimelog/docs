@@ -1,0 +1,279 @@
+---
+title: "Create a user"
+description: "Add a new user to the organization"
+---
+
+```http
+POST /v1/user/create
+```
+
+Creates a user on the site. The created user is returned in the response envelope.
+
+<Warning>
+  **This operation is not idempotent.** A retry after an ambiguous failure can create a
+  second user. Call
+  [Validate a new user](/api-reference/users/validate-new-user) first with the identical
+  payload — it runs the same checks and writes nothing.
+</Warning>
+
+## Authorization
+
+<ParamField header="Authorization" type="string" required>
+  `Bearer <personal access token>`. See [Authentication](/api-reference/authentication).
+</ParamField>
+
+<Note>
+  Creating users requires an administrative role. A token created from a normal employee
+  account will not have it.
+</Note>
+
+## Body
+
+`application/json`, required. The model is `UserApiCreateModel`.
+
+<ParamField body="UserName" type="string">
+  The user name used for authentication. Must be unique on the site.
+</ParamField>
+
+<ParamField body="FirstName" type="string">
+</ParamField>
+
+<ParamField body="LastName" type="string">
+</ParamField>
+
+<ParamField body="Initials" type="string">
+  The user's initials. No longer used for authentication, but still shown throughout
+  TimeLog and used as a short display form.
+</ParamField>
+
+<ParamField body="Language" type="integer">
+  Interface language, as an integer. See [Language values](#language-values).
+</ParamField>
+
+<ParamField body="EmployeeType" type="integer">
+  User type — `0` Employee, `1` ApiUser, `2` ExternalRessource, `3` AnonymizedEmployee.
+  See [User types](/api-reference/users/list#user-types).
+</ParamField>
+
+<ParamField body="DepartmentID" type="integer | null">
+  The department to place the user in. Identifiers come from
+  [Get all departments](/api-reference/departments/list).
+</ParamField>
+
+<ParamField body="DepartmentName" type="string">
+  Denormalised department name. Marked for removal in the underlying model — set
+  `DepartmentID` and do not rely on this.
+</ParamField>
+
+<ParamField body="IsActive" type="boolean">
+  Whether the user is active on creation.
+</ParamField>
+
+<ParamField body="IsLocked" type="boolean">
+  Whether the account is locked out.
+</ParamField>
+
+<ParamField body="IsSystemUser" type="boolean">
+  Whether this is a system user.
+</ParamField>
+
+<ParamField body="Comment" type="string">
+  Free-text description of the user.
+</ParamField>
+
+<ParamField body="UserId" type="integer">
+  Present on the model. Leave it out on create — the identifier is assigned by TimeLog.
+</ParamField>
+
+<ParamField body="MedarbejderId" type="integer">
+  Legacy employee identifier, retained for backwards compatibility.
+</ParamField>
+
+<ParamField body="UserProfile" type="object">
+  The user's profile. The model exposes no documented fields.
+</ParamField>
+
+<Warning>
+  The model also carries `PasswordHash`, `PasswordSalt`, `LastFailed` and
+  `NumberOfFailedAttempts`. These are **authentication internals** — do not populate them.
+  Sending a hash and salt from another system does not migrate a password, and putting
+  credential material into an integration payload puts it in your logs.
+</Warning>
+
+### Language values
+
+The values are not contiguous. Use the table, not an incrementing index.
+
+| Value | Language | | Value | Language |
+| --- | --- | --- | --- | --- |
+| `1` | Danish | | `17` | Dutch |
+| `2` | English | | `18` | French |
+| `4` | Swedish | | `19` | Finnish |
+| `15` | Norwegian | | `20` | Russian |
+| `16` | German | | `21` | Swiss |
+
+## Response
+
+`200` — a [single-resource envelope](/api-reference/response-format#single-resource)
+containing the created user as `UserApiCreateModel`.
+
+<ResponseField name="Properties" type="object">
+  The created user, echoing the submitted model with the assigned `UserId`.
+</ResponseField>
+
+<ResponseField name="Links" type="TafLink[]">
+</ResponseField>
+
+<ResponseField name="Actions" type="TafAction[]">
+</ResponseField>
+
+## Errors
+
+| Code | Cause |
+| --- | --- |
+| `400` | The body is malformed or missing. |
+| `401` | Invalid authentication token, wrong instance, or wrong account. |
+| `500` | The user could not be created. Carries a [`ResponseError`](/api-reference/errors#the-error-body) body — read `Message`. |
+
+<Warning>
+  A `500` here is a business-rule rejection, not necessarily an outage — a duplicate user
+  name, a missing licence, an unknown department. Log `Message` and surface it; do not
+  retry blindly.
+
+  If a create fails without a clear `ResponseError`, check
+  [Get all users](/api-reference/users/list) before retrying, in case it partly
+  succeeded.
+</Warning>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST https://app3.timelog.com/acme/api/v1/user/create \
+  -H "Authorization: Bearer $TIMELOG_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "UserName": "ada.lovelace",
+    "FirstName": "Ada",
+    "LastName": "Lovelace",
+    "Initials": "AL",
+    "Language": 2,
+    "EmployeeType": 0,
+    "DepartmentID": 7,
+    "IsActive": true
+  }'
+```
+
+```csharp C#
+var payload = new
+{
+    UserName = "ada.lovelace",
+    FirstName = "Ada",
+    LastName = "Lovelace",
+    Initials = "AL",
+    Language = 2,        // English
+    EmployeeType = 0,    // Employee
+    DepartmentID = 7,
+    IsActive = true,
+};
+
+// Dry run first - same payload, no write.
+var check = await http.PostAsJsonAsync("v1/user/validate-new-user", payload);
+check.EnsureSuccessStatusCode();
+
+var response = await http.PostAsJsonAsync("v1/user/create", payload);
+response.EnsureSuccessStatusCode();
+
+var envelope = await response.Content.ReadFromJsonAsync<TafSingle<JsonElement>>();
+```
+
+```python Python
+payload = {
+    "UserName": "ada.lovelace",
+    "FirstName": "Ada",
+    "LastName": "Lovelace",
+    "Initials": "AL",
+    "Language": 2,       # English
+    "EmployeeType": 0,   # Employee
+    "DepartmentID": 7,
+    "IsActive": True,
+}
+
+# Dry run first - same payload, no write.
+client.post("/v1/user/validate-new-user", json=payload).raise_for_status()
+
+response = client.post("/v1/user/create", json=payload)
+if response.status_code == 500:
+    raise RuntimeError(response.json()["Message"])
+response.raise_for_status()
+
+created = response.json()["Properties"]
+```
+
+```javascript JavaScript
+const payload = {
+  UserName: "ada.lovelace",
+  FirstName: "Ada",
+  LastName: "Lovelace",
+  Initials: "AL",
+  Language: 2, // English
+  EmployeeType: 0, // Employee
+  DepartmentID: 7,
+  IsActive: true,
+};
+
+const headers = {
+  Authorization: `Bearer ${token}`,
+  "Content-Type": "application/json",
+};
+
+// Dry run first - same payload, no write.
+await fetch(`${baseUrl}/v1/user/validate-new-user`, {
+  method: "POST",
+  headers,
+  body: JSON.stringify(payload),
+});
+
+const response = await fetch(`${baseUrl}/v1/user/create`, {
+  method: "POST",
+  headers,
+  body: JSON.stringify(payload),
+});
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json 200
+{
+  "Properties": {
+    "UserId": 1235,
+    "UserName": "ada.lovelace",
+    "FirstName": "Ada",
+    "LastName": "Lovelace",
+    "Initials": "AL",
+    "Language": 2,
+    "EmployeeType": 0,
+    "DepartmentID": 7,
+    "DepartmentName": "Engineering",
+    "IsActive": true,
+    "IsLocked": false,
+    "IsSystemUser": false
+  },
+  "Links": [],
+  "Actions": []
+}
+```
+
+```json 500
+{
+  "Code": 4002,
+  "Message": "User could not be created",
+  "Details": [],
+  "Parameters": null,
+  "Url": null,
+  "DeveloperNote": null
+}
+```
+
+</ResponseExample>

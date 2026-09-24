@@ -1,0 +1,134 @@
+---
+title: "Get a user by ID"
+description: "Retrieve a single user by their user identifier"
+---
+
+```http
+GET /v1/user/{id}
+```
+
+Returns one user by their `UserID`. This is the endpoint to resolve the `UserID` values
+that appear on other resources — for example the `UserID` on every
+[employee projection](/api-reference/employee-projections/get-in-period) record.
+
+## Authorization
+
+<ParamField header="Authorization" type="string" required>
+  `Bearer <personal access token>`. See [Authentication](/api-reference/authentication).
+</ParamField>
+
+## Path parameters
+
+<ParamField path="id" type="integer" required>
+  The user identifier. A 32-bit integer — not the GUID form.
+</ParamField>
+
+## Response
+
+`200` — a [single-resource envelope](/api-reference/response-format#single-resource).
+
+<ResponseField name="Properties" type="object">
+  The user.
+</ResponseField>
+
+<ResponseField name="Links" type="TafLink[]">
+</ResponseField>
+
+<ResponseField name="Actions" type="TafAction[]">
+</ResponseField>
+
+<Warning>
+  **The user payload is not specified in the API contract.** `UserApiReadModel` exposes no
+  documented fields. Inspect a live response from your own site before mapping it. See
+  [Get the current user (v2)](/api-reference/users/get-current-v2) for the one user model
+  in this API that **is** specified.
+</Warning>
+
+## Errors
+
+| Code | Cause |
+| --- | --- |
+| `401` | Invalid authentication token, wrong instance, or wrong account. |
+| `404` | No user matches the identifier. |
+| `500` | No user matching the identifier was found. Carries a [`ResponseError`](/api-reference/errors#the-error-body) body. |
+
+<Warning>
+  This endpoint reports an unknown identifier as **both** `404` and `500` depending on
+  where the lookup fails. Treat both as "not found" — a client that retries on `500` will
+  loop on a user that does not exist.
+
+  ```python
+  if response.status_code in (404, 500):
+      return None
+  ```
+</Warning>
+
+<Note>
+  Resolving many users one call at a time is slow and will dominate your rate budget.
+  Fetch [all users](/api-reference/users/list) once and build a lookup keyed by user
+  identifier instead.
+</Note>
+
+<RequestExample>
+
+```bash cURL
+curl https://app3.timelog.com/acme/api/v1/user/1234 \
+  -H "Authorization: Bearer $TIMELOG_TOKEN"
+```
+
+```csharp C#
+var response = await http.GetAsync("v1/user/1234");
+
+if (response.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.InternalServerError)
+    return null;
+
+response.EnsureSuccessStatusCode();
+var envelope = await response.Content.ReadFromJsonAsync<TafSingle<JsonElement>>();
+```
+
+```python Python
+response = client.get("/v1/user/1234")
+
+# An unknown id surfaces as either 404 or 500.
+if response.status_code in (404, 500):
+    user = None
+else:
+    response.raise_for_status()
+    user = response.json()["Properties"]
+```
+
+```javascript JavaScript
+const response = await fetch(`${baseUrl}/v1/user/1234`, {
+  headers: { Authorization: `Bearer ${token}` },
+});
+
+const user =
+  response.status === 404 || response.status === 500
+    ? null
+    : (await response.json()).Properties;
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json 200
+{
+  "Properties": {},
+  "Links": [],
+  "Actions": []
+}
+```
+
+```json 500
+{
+  "Code": 4004,
+  "Message": "No user matching the identifier was found",
+  "Details": [],
+  "Parameters": null,
+  "Url": null,
+  "DeveloperNote": null
+}
+```
+
+</ResponseExample>

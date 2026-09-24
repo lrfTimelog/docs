@@ -1,0 +1,146 @@
+---
+title: "Get all legal entities"
+description: "Retrieve every legal entity configured on the site"
+---
+
+```http
+GET /v1/legal-entity
+```
+
+Returns every legal entity on the site. A legal entity is the company a TimeLog site
+invoices and reports under — a single-company site has one, a group has several, each with
+its own currency and country.
+
+Exactly one of them is the system legal entity, flagged by `IsSystemLegalEntity`. See
+[Get the system legal entity](/api-reference/legal-entities/get-system) for the direct
+route to it.
+
+## Authorization
+
+<ParamField header="Authorization" type="string" required>
+  `Bearer <personal access token>`. See [Authentication](/api-reference/authentication).
+</ParamField>
+
+## Response
+
+`200` — a [collection envelope](/api-reference/response-format#collection).
+
+<ResponseField name="Entities" type="object[]">
+  One entry per legal entity. Omitted entirely if there are none.
+
+  <Expandable title="Properties" defaultOpen>
+    <ResponseField name="LegalEntityID" type="integer">
+      The legal entity identifier. This is the value
+      [Get a legal entity by ID](/api-reference/legal-entities/get-by-id) expects.
+    </ResponseField>
+    <ResponseField name="ID" type="string">
+      GUID form of the identifier.
+    </ResponseField>
+    <ResponseField name="Name" type="string">
+      Registered name of the legal entity.
+    </ResponseField>
+    <ResponseField name="IsActive" type="boolean">
+      Whether the entity is active.
+    </ResponseField>
+    <ResponseField name="CurrencyISO" type="string">
+      ISO 4217 currency code the entity reports in — `DKK`, `EUR`, `SEK`.
+    </ResponseField>
+    <ResponseField name="CountryISO" type="string">
+      ISO 3166 country code of the entity's registration.
+    </ResponseField>
+    <ResponseField name="IsSystemLegalEntity" type="boolean">
+      Whether this is the site's default entity. True on exactly one.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Errors
+
+| Code | Cause |
+| --- | --- |
+| `401` | Invalid authentication token, wrong instance, or wrong account. See [Errors](/api-reference/errors). |
+
+<Note>
+  `CurrencyISO` varies per entity on a multi-entity site. Any integration that aggregates
+  amounts across entities has to convert — the API returns figures in each entity's own
+  currency and does not normalise them.
+</Note>
+
+<RequestExample>
+
+```bash cURL
+curl https://app3.timelog.com/acme/api/v1/legal-entity \
+  -H "Authorization: Bearer $TIMELOG_TOKEN"
+```
+
+```csharp C#
+var response = await http.GetAsync("v1/legal-entity");
+var envelope = await response.Content.ReadFromJsonAsync<TafList<LegalEntity>>();
+
+var byId = envelope.Entities
+    .Select(e => e.Properties)
+    .ToDictionary(le => le.LegalEntityID);
+```
+
+```python Python
+response = client.get("/v1/legal-entity")
+response.raise_for_status()
+
+entities = [e["Properties"] for e in response.json().get("Entities", [])]
+system = next(e for e in entities if e["IsSystemLegalEntity"])
+```
+
+```javascript JavaScript
+const response = await fetch(`${baseUrl}/v1/legal-entity`, {
+  headers: { Authorization: `Bearer ${token}` },
+});
+
+const { Entities = [] } = await response.json();
+const entities = Entities.map((e) => e.Properties);
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json 200
+{
+  "Properties": {
+    "PageNumber": "1",
+    "TotalPage": "1",
+    "TotalRecord": "2"
+  },
+  "Entities": [
+    {
+      "Properties": {
+        "LegalEntityID": 1,
+        "ID": "3c4d5e6f-7a8b-4c9d-0e1f-2a3b4c5d6e7f",
+        "Name": "Acme A/S",
+        "IsActive": true,
+        "CurrencyISO": "DKK",
+        "CountryISO": "DK",
+        "IsSystemLegalEntity": true
+      },
+      "Links": [],
+      "Actions": []
+    },
+    {
+      "Properties": {
+        "LegalEntityID": 2,
+        "ID": "4d5e6f7a-8b9c-4d0e-1f2a-3b4c5d6e7f8a",
+        "Name": "Acme Sverige AB",
+        "IsActive": true,
+        "CurrencyISO": "SEK",
+        "CountryISO": "SE",
+        "IsSystemLegalEntity": false
+      },
+      "Links": [],
+      "Actions": []
+    }
+  ],
+  "Links": [],
+  "Actions": []
+}
+```
+
+</ResponseExample>

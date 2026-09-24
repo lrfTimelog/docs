@@ -1,0 +1,83 @@
+---
+title: "Introduction"
+description: "The TimeLog REST API"
+icon: "hand-wave"
+sidebarTitle: "Introduction"
+---
+
+The REST API is the modern TimeLog API and the one to build against for new integrations. It exposes your organization's data — people, departments, legal entities, projects, time — over ordinary HTTPS with JSON bodies and a personal access token.
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="key" href="/api-reference/authentication">
+    Get a token, build your base URL, make your first call.
+  </Card>
+
+  <Card title="Response format" icon="box-open" href="/api-reference/response-format">
+    Every response is enveloped. Read this before you write a parser.
+  </Card>
+
+  <Card title="Errors" icon="triangle-exclamation" href="/api-reference/errors">
+    Status codes, the error body, and what a 401 actually means here.
+  </Card>
+
+  <Card title="Users" icon="user" href="/api-reference/users/get-current">
+    The cheapest call in the API, and the one that proves your setup works.
+  </Card>
+</CardGroup>
+
+## Base URL
+
+Every TimeLog site has its own address, so there is no shared host:
+
+```text
+https://app{instance}.timelog.com/{account}/api
+```
+
+For a site at `https://app3.timelog.com/acme/`, the base URL is `https://app3.timelog.com/acme/api`. [Authentication](/api-reference/authentication) walks through both parts.
+
+## Three things that differ from most APIs
+
+They account for nearly every failed first attempt.
+
+<AccordionGroup>
+  <Accordion title="The base URL is yours, not ours" icon="link">
+    There is no `api.timelog.com` to call. The host carries your instance number and the path carries your account name, and both come from the address you already use to sign in.
+  </Accordion>
+
+  <Accordion title="A token is a whole user, not a scope" icon="key">
+    A personal access token acts as the user who created it and carries exactly that user's permissions. There is no narrower scope — a token made from an administrator account is an administrator credential.
+  </Accordion>
+
+  <Accordion title="Responses are enveloped" icon="box-open">
+    The resource is never at the top level of the body. A single resource arrives under `Properties`, a collection under `Entities[].Properties`, each alongside `Links` and `Actions`. See [Response format](/api-reference/response-format).
+  </Accordion>
+</AccordionGroup>
+
+## Versions
+
+`v1` and `v2` are both live and both current. They are not two generations of one API: the version sits in the path, and most services exist at only one of the two, so the version is decided per endpoint rather than globally. Each operation page states its own path.
+
+`GET /v1/user/me` and `GET /v2/users/me` are the clearest example — both current, both returning the signed-in user, with different models. Neither supersedes the other.
+
+## What is covered here
+
+This reference documents the **Organization** surface: the people and structural data that everything else in TimeLog hangs off.
+
+| Resource | Operations | Read | Write |
+| --- | --- | --- | --- |
+| [Departments](/api-reference/departments/list) | 1 | Yes | — |
+| [Employee projections](/api-reference/employee-projections/get-in-period) | 1 | Yes | — |
+| [Legal entities](/api-reference/legal-entities/list) | 3 | Yes | — |
+| [Users](/api-reference/users/list) | 7 | Yes | Yes |
+
+## Other TimeLog APIs
+
+<CardGroup cols={2}>
+  <Card title="Transactional API" icon="plug">
+    The SOAP surface. Still supported; not the recommended starting point for new work.
+  </Card>
+
+  <Card title="Reporting API" icon="chart-simple">
+    Read-only reporting extracts. Separate credentials — Site Code, API ID and API Password — which do **not** work against the REST API.
+  </Card>
+</CardGroup>

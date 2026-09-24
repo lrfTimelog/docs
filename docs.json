@@ -1,0 +1,132 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "TimeLog",
+  "colors": {
+    "primary": "#E84895",
+    "light": "#F292C0",
+    "dark": "#6D0D3C"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "pages": [
+      {
+        "group": "TimeLog REST API",
+        "pages": [
+          {
+            "group": "Get started",
+            "icon": "rocket",
+            "pages": [
+              "index",
+              "api-reference/authentication",
+              "api-reference/response-format",
+              "api-reference/errors"
+            ]
+          },
+          {
+            "group": "Departments",
+            "icon": "sitemap",
+            "pages": [
+              "api-reference/departments/list"
+            ]
+          },
+          {
+            "group": "Employee projections",
+            "icon": "calendar-days",
+            "pages": [
+              "api-reference/employee-projections/get-in-period"
+            ]
+          },
+          {
+            "group": "Legal entities",
+            "icon": "building-columns",
+            "pages": [
+              "api-reference/legal-entities/list",
+              "api-reference/legal-entities/get-system",
+              "api-reference/legal-entities/get-by-id"
+            ]
+          },
+          {
+            "group": "Users",
+            "icon": "users",
+            "pages": [
+              "api-reference/users/list",
+              "api-reference/users/get-current-v2",
+              "api-reference/users/get-by-id",
+              "api-reference/users/get-current",
+              "api-reference/users/create",
+              "api-reference/users/validate-new-user",
+              "api-reference/users/update"
+            ]
+          }
+        ],
+        "icon": "puzzle-piece"
+      }
+    ]
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg",
+    "href": "https://www.timelog.com"
+  },
+  "navbar": {
+    "links": [
+      {
+        "href": "https://api.timelog.com/",
+        "label": "Published API reference"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "timelog.com",
+      "href": "https://www.timelog.com"
+    }
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
+  },
+  "footer": {
+    "socials": {
+      "linkedin": "https://www.linkedin.com/company/timelog-a-s",
+      "x": "https://x.com/timelog"
+    }
+  },
+  "description": "TimeLog developer documentation",
+  "api": {
+    "playground": {
+      "display": "interactive"
+    },
+    "examples": {
+      "languages": [
+        "curl",
+        "csharp",
+        "python",
+        "javascript"
+      ]
+    }
+  },
+  "background": {
+    "decoration": "gradient",
+    "color": {
+      "light": "#FAFAFA",
+      "dark": "#313131"
+    }
+  },
+  "fonts": {
+    "heading": {
+      "family": "Geist"
+    },
+    "body": {
+      "family": "Geist"
+    }
+  }
+}

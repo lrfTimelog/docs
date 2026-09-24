@@ -1,0 +1,110 @@
+---
+title: "Get the current user"
+description: "Retrieve the user the access token belongs to"
+---
+
+```http
+GET /v1/user/me
+```
+
+Returns the user the personal access token was created by. Takes no parameters, reads no
+large tables, and touches every part of your configuration — base URL, instance, account
+and token — which makes it the call to use for connectivity checks and health probes.
+
+<Tip>
+  Run this first after setting up. A `200` proves all four inputs are right; a `401`
+  means one of them is wrong. See [Authentication](/api-reference/authentication#4-verify).
+</Tip>
+
+## Authorization
+
+<ParamField header="Authorization" type="string" required>
+  `Bearer <personal access token>`. See [Authentication](/api-reference/authentication).
+</ParamField>
+
+## Response
+
+`200` — a [single-resource envelope](/api-reference/response-format#single-resource).
+
+<ResponseField name="Properties" type="object">
+  The signed-in user.
+</ResponseField>
+
+<ResponseField name="Links" type="TafLink[]">
+</ResponseField>
+
+<ResponseField name="Actions" type="TafAction[]">
+</ResponseField>
+
+<Warning>
+  **The user payload is not specified in the API contract.** `UserApiReadModel` exposes no
+  documented fields.
+
+  For the signed-in user specifically, prefer
+  [`GET /v2/users/me`](/api-reference/users/get-current-v2) — it returns
+  `UsersApiReadModel`, which **is** specified and includes `Email`, `FullName`,
+  `LegalEntityId` and the user type. Use this `v1` endpoint for health checks, where the
+  status code is the answer and the body does not matter.
+</Warning>
+
+## Errors
+
+| Code | Cause |
+| --- | --- |
+| `401` | Invalid authentication token, wrong instance, or wrong account. TimeLog does not say which — see [Errors](/api-reference/errors#the-401-is-ambiguous). |
+
+<RequestExample>
+
+```bash cURL
+curl -i https://app3.timelog.com/acme/api/v1/user/me \
+  -H "Authorization: Bearer $TIMELOG_TOKEN"
+```
+
+```csharp C#
+// Connectivity check: the status code is the result.
+var response = await http.GetAsync("v1/user/me");
+
+var connected = response.StatusCode == HttpStatusCode.OK;
+if (!connected)
+    throw new InvalidOperationException(
+        "TimeLog rejected the credentials. Check the account segment and instance " +
+        "number before assuming the token is bad.");
+```
+
+```python Python
+response = client.get("/v1/user/me")
+
+if response.status_code == 401:
+    raise RuntimeError(
+        "TimeLog rejected the credentials. Check the account segment and instance "
+        "number before assuming the token is bad."
+    )
+response.raise_for_status()
+```
+
+```javascript JavaScript
+const response = await fetch(`${baseUrl}/v1/user/me`, {
+  headers: { Authorization: `Bearer ${token}` },
+});
+
+if (!response.ok) {
+  throw new Error(
+    "TimeLog rejected the credentials. Check the account segment and instance " +
+      "number before assuming the token is bad.",
+  );
+}
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json 200
+{
+  "Properties": {},
+  "Links": [],
+  "Actions": []
+}
+```
+
+</ResponseExample>

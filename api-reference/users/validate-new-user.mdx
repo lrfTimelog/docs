@@ -1,0 +1,151 @@
+---
+title: "Validate a new user"
+description: "Check a user payload against TimeLog's rules without creating anything"
+---
+
+```http
+POST /v1/user/validate-new-user
+```
+
+Runs the same checks as [Create a user](/api-reference/users/create) against an identical
+payload and writes nothing. A `200` means the payload would be accepted; a `500` carries
+the reason it would not.
+
+This is the dry run that makes user creation safe to automate. `POST /v1/user/create` is
+not idempotent, so a failed create is expensive to recover from — validating first turns
+most of those failures into a cheap rejection.
+
+<Tip>
+  Send the **exact** payload you intend to create. Validating a different object proves
+  nothing about the one you are about to write.
+</Tip>
+
+## Authorization
+
+<ParamField header="Authorization" type="string" required>
+  `Bearer <personal access token>`. See [Authentication](/api-reference/authentication).
+</ParamField>
+
+## Body
+
+`application/json`, required. The model is `UserApiCreateModel` — identical to
+[Create a user](/api-reference/users/create#body). See that page for the full field list,
+the [language values](/api-reference/users/create#language-values), and the warning about
+the credential fields.
+
+## Response
+
+`200` — the payload passed validation.
+
+<Warning>
+  **The body is literal `null`, not an object.** The action returns a success result that
+  serialises the default of the read model. Treat the status code as the answer; do not
+  parse the body.
+
+  ```json
+  null
+  ```
+</Warning>
+
+## Errors
+
+| Code | Cause |
+| --- | --- |
+| `400` | The body is malformed or missing. |
+| `401` | Invalid authentication token, wrong instance, or wrong account. |
+| `500` | The user would be rejected. Carries a [`ResponseError`](/api-reference/errors#the-error-body) body — `Message` is the reason. |
+
+<Note>
+  Validation is not a lock. Between a successful validation and the create, another
+  process can take the user name you just checked. The window is small; handle a `500` on
+  create regardless.
+</Note>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST https://app3.timelog.com/acme/api/v1/user/validate-new-user \
+  -H "Authorization: Bearer $TIMELOG_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "UserName": "ada.lovelace",
+    "FirstName": "Ada",
+    "LastName": "Lovelace",
+    "Initials": "AL",
+    "Language": 2,
+    "EmployeeType": 0,
+    "DepartmentID": 7,
+    "IsActive": true
+  }'
+```
+
+```csharp C#
+async Task<string?> ValidateAsync(object payload)
+{
+    var response = await http.PostAsJsonAsync("v1/user/validate-new-user", payload);
+
+    if (response.StatusCode == HttpStatusCode.InternalServerError)
+    {
+        var error = await response.Content.ReadFromJsonAsync<ResponseError>();
+        return error?.Message;   // rejection reason
+    }
+
+    response.EnsureSuccessStatusCode();
+    return null;                 // would be accepted
+}
+```
+
+```python Python
+def validate(payload: dict) -> str | None:
+    """Return None if the payload would be accepted, else the rejection reason."""
+    response = client.post("/v1/user/validate-new-user", json=payload)
+
+    if response.status_code == 500:
+        return response.json()["Message"]
+
+    response.raise_for_status()
+    return None  # 200 with a null body
+
+
+reason = validate(payload)
+if reason:
+    raise ValueError(f"TimeLog would reject this user: {reason}")
+```
+
+```javascript JavaScript
+async function validate(payload) {
+  const response = await fetch(`${baseUrl}/v1/user/validate-new-user`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (response.status === 500) return (await response.json()).Message;
+  if (!response.ok) throw new Error(`Validation failed: ${response.status}`);
+  return null; // 200, body is null
+}
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json 200
+null
+```
+
+```json 500
+{
+  "Code": 4003,
+  "Message": "A user with that user name already exists",
+  "Details": [],
+  "Parameters": null,
+  "Url": null,
+  "DeveloperNote": null
+}
+```
+
+</ResponseExample>

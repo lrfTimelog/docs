@@ -1,0 +1,170 @@
+---
+title: "Get all departments"
+description: "Retrieve every department in the organization"
+---
+
+```http
+GET /v1/department
+```
+
+Returns every department on the site — active and inactive — as a flat list. The
+hierarchy is expressed through `ParentID` rather than nesting: a department with no
+`ParentID` is a root, and you rebuild the tree client-side.
+
+## Authorization
+
+<ParamField header="Authorization" type="string" required>
+  `Bearer <personal access token>`. See [Authentication](/api-reference/authentication).
+</ParamField>
+
+## Response
+
+`200` — a [collection envelope](/api-reference/response-format#collection).
+
+<ResponseField name="Properties" type="object">
+  Paging counters, serialised as strings.
+
+  <Expandable title="properties">
+    <ResponseField name="PageNumber" type="string">
+    </ResponseField>
+    <ResponseField name="TotalPage" type="string">
+    </ResponseField>
+    <ResponseField name="TotalRecord" type="string">
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="Entities" type="object[]">
+  One entry per department. Omitted entirely if there are none.
+
+  <Expandable title="Properties" defaultOpen>
+    <ResponseField name="DepartmentID" type="integer">
+      The department identifier. This is the value other endpoints expect.
+    </ResponseField>
+    <ResponseField name="ID" type="string">
+      GUID form of the identifier.
+    </ResponseField>
+    <ResponseField name="Name" type="string">
+      Display name of the department.
+    </ResponseField>
+    <ResponseField name="No" type="string">
+      The department number, as maintained in TimeLog. Often the key your finance or
+      payroll system matches on.
+    </ResponseField>
+    <ResponseField name="IsActive" type="boolean">
+      Whether the department is active. Inactive departments are returned too.
+    </ResponseField>
+    <ResponseField name="ParentID" type="integer">
+      `DepartmentID` of the parent department. Absent or zero at the root.
+    </ResponseField>
+    <ResponseField name="ManagerEmployeeID" type="integer">
+      Employee identifier of the department manager.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Errors
+
+| Code | Cause |
+| --- | --- |
+| `401` | Invalid authentication token, wrong instance, or wrong account. See [Errors](/api-reference/errors). |
+
+<Note>
+  The response includes inactive departments. Filter on `IsActive` if you are populating
+  a picker — syncing them wholesale into another system will resurrect departments that
+  were retired in TimeLog.
+</Note>
+
+<RequestExample>
+
+```bash cURL
+curl https://app3.timelog.com/acme/api/v1/department \
+  -H "Authorization: Bearer $TIMELOG_TOKEN"
+```
+
+```csharp C#
+var response = await http.GetAsync("v1/department");
+var envelope = await response.Content.ReadFromJsonAsync<TafList<Department>>();
+
+var active = envelope.Entities
+    .Select(e => e.Properties)
+    .Where(d => d.IsActive)
+    .ToList();
+```
+
+```python Python
+response = client.get("/v1/department")
+response.raise_for_status()
+
+# Entities is absent, not empty, when there are no results.
+departments = [e["Properties"] for e in response.json().get("Entities", [])]
+active = [d for d in departments if d["IsActive"]]
+```
+
+```javascript JavaScript
+const response = await fetch(`${baseUrl}/v1/department`, {
+  headers: { Authorization: `Bearer ${token}` },
+});
+
+const { Entities = [] } = await response.json();
+const active = Entities.map((e) => e.Properties).filter((d) => d.IsActive);
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json 200
+{
+  "Properties": {
+    "PageNumber": "1",
+    "TotalPage": "1",
+    "TotalRecord": "3"
+  },
+  "Entities": [
+    {
+      "Properties": {
+        "DepartmentID": 1,
+        "ID": "6f9619ff-8b86-d011-b42d-00cf4fc964ff",
+        "Name": "Acme A/S",
+        "No": "100",
+        "IsActive": true,
+        "ParentID": 0,
+        "ManagerEmployeeID": 12
+      },
+      "Links": [],
+      "Actions": []
+    },
+    {
+      "Properties": {
+        "DepartmentID": 7,
+        "ID": "1c2d3e4f-5a6b-4c8d-9e0f-1a2b3c4d5e6f",
+        "Name": "Engineering",
+        "No": "110",
+        "IsActive": true,
+        "ParentID": 1,
+        "ManagerEmployeeID": 34
+      },
+      "Links": [],
+      "Actions": []
+    },
+    {
+      "Properties": {
+        "DepartmentID": 9,
+        "ID": "2b3c4d5e-6f7a-4b9c-8d0e-1f2a3b4c5d6e",
+        "Name": "Support (closed)",
+        "No": "120",
+        "IsActive": false,
+        "ParentID": 1,
+        "ManagerEmployeeID": 34
+      },
+      "Links": [],
+      "Actions": []
+    }
+  ],
+  "Links": [],
+  "Actions": []
+}
+```
+
+</ResponseExample>

@@ -1,0 +1,159 @@
+---
+title: "Response format"
+description: "The TAF envelope — Properties, Entities, Links and Actions"
+icon: "box-open"
+---
+
+The resource you asked for is never at the top level of the response body. Every `200`
+arrives wrapped in an envelope that carries the payload alongside hypermedia links and
+available follow-up actions.
+
+There are two shapes.
+
+## Single resource
+
+The resource sits under `Properties`.
+
+```json
+{
+  "Properties": {
+    "UserId": 1234,
+    "FullName": "Ada Lovelace"
+  },
+  "Links": [],
+  "Actions": []
+}
+```
+
+<ResponseField name="Properties" type="object">
+  The resource. Its shape is documented on each endpoint page.
+</ResponseField>
+
+<ResponseField name="Links" type="TafLink[]">
+  Hypermedia links related to this resource.
+</ResponseField>
+
+<ResponseField name="Actions" type="TafAction[]">
+  Operations the caller may perform next on this resource.
+</ResponseField>
+
+## Collection
+
+Each result is an entry in `Entities`, with the resource under its own `Properties`. The
+top-level `Properties` carries paging counters instead of a resource.
+
+```json
+{
+  "Properties": {
+    "PageNumber": "1",
+    "TotalPage": "3",
+    "TotalRecord": "57"
+  },
+  "Entities": [
+    {
+      "Properties": { "DepartmentID": 7, "Name": "Engineering" },
+      "Links": [],
+      "Actions": []
+    }
+  ],
+  "Links": [],
+  "Actions": []
+}
+```
+
+<ResponseField name="Properties" type="object">
+  Paging counters.
+
+  <Expandable title="properties" defaultOpen>
+    <ResponseField name="PageNumber" type="string">
+      The page this response represents.
+    </ResponseField>
+    <ResponseField name="TotalPage" type="string">
+      Total number of pages in the result set.
+    </ResponseField>
+    <ResponseField name="TotalRecord" type="string">
+      Total number of records across all pages.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="Entities" type="object[]">
+  One entry per result, each a single-resource envelope.
+</ResponseField>
+
+<Warning>
+  **The counters are strings, not numbers.** `"TotalRecord": "57"`, not `57`. A typed
+  client that declares them as integers will fail to deserialise.
+</Warning>
+
+<Warning>
+  **`Entities` is omitted entirely when the result set is empty** — it is not returned as
+  `[]`. Code that indexes into it without a presence check will throw on an empty result.
+
+  ```python
+  entities = body.get("Entities", [])   # correct
+  entities = body["Entities"]           # raises on an empty result
+  ```
+</Warning>
+
+## Links and actions
+
+Both envelopes carry hypermedia. Most endpoints return them empty, but the fields are
+always present on a `200`.
+
+### TafLink
+
+<ResponseField name="Href" type="string" required>
+  Absolute URL of the linked resource.
+</ResponseField>
+<ResponseField name="Rel" type="string" required>
+  Name of the relationship.
+</ResponseField>
+<ResponseField name="Actions" type="TafAction[]">
+  Actions available on the linked resource.
+</ResponseField>
+
+### TafAction
+
+<ResponseField name="Name" type="string">
+</ResponseField>
+
+<ResponseField name="Title" type="string">
+</ResponseField>
+
+<ResponseField name="Method" type="integer">
+  The HTTP method, serialised as the integer value of the `TafRequestMethods` enum — not
+  as `"GET"` or `"POST"`.
+</ResponseField>
+
+<ResponseField name="Href" type="string">
+</ResponseField>
+
+<ResponseField name="Type" type="string">
+</ResponseField>
+
+<ResponseField name="Fields" type="TafActionField[]">
+  The payload the action expects, one entry per field.
+
+  <Expandable title="properties">
+    <ResponseField name="Name" type="string">
+    </ResponseField>
+    <ResponseField name="Type" type="string">
+    </ResponseField>
+    <ResponseField name="Value">Free-form JSON value.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Write operations
+
+Not every `200` carries a body worth reading. `PUT /v1/user` and
+`POST /v1/user/validate-new-user` return `200` with a body of literal `null`.
+
+```json
+null
+```
+
+<Warning>
+  A client that expects an object on every `200` will break on those two endpoints. Treat
+  the status code as the result and ignore the body.
+</Warning>

@@ -1,0 +1,106 @@
+---
+title: "Get the system legal entity"
+description: "Retrieve the site's default legal entity"
+---
+
+```http
+GET /v1/legal-entity/system
+```
+
+Returns the site's default legal entity — the one with `IsSystemLegalEntity` set to `true`.
+Every TimeLog site has exactly one, including single-company sites.
+
+Use this when an integration needs the site's own currency, country or registered name
+and does not care about the other entities. It saves fetching the whole list and
+filtering.
+
+## Authorization
+
+<ParamField header="Authorization" type="string" required>
+  `Bearer <personal access token>`. See [Authentication](/api-reference/authentication).
+</ParamField>
+
+## Response
+
+`200` — a [single-resource envelope](/api-reference/response-format#single-resource).
+
+<ResponseField name="Properties" type="object">
+  The system legal entity.
+</ResponseField>
+
+<ResponseField name="Links" type="TafLink[]">
+</ResponseField>
+
+<ResponseField name="Actions" type="TafAction[]">
+</ResponseField>
+
+<Warning>
+  **The `Properties` payload is not specified in the API contract.** The envelope is
+  documented; the resource inside it is not. Observed responses match the
+  `LegalEntityApiReadModel` returned by
+  [Get all legal entities](/api-reference/legal-entities/list) — `LegalEntityID`, `ID`,
+  `Name`, `IsActive`, `CurrencyISO`, `CountryISO`, `IsSystemLegalEntity` — but that is an
+  observation, not a guarantee.
+
+  If you need a shape you can rely on, call
+  [Get all legal entities](/api-reference/legal-entities/list) and filter on
+  `IsSystemLegalEntity` instead. That endpoint's payload **is** specified.
+</Warning>
+
+## Errors
+
+| Code | Cause |
+| --- | --- |
+| `401` | Invalid authentication token, wrong instance, or wrong account. See [Errors](/api-reference/errors). |
+
+<RequestExample>
+
+```bash cURL
+curl https://app3.timelog.com/acme/api/v1/legal-entity/system \
+  -H "Authorization: Bearer $TIMELOG_TOKEN"
+```
+
+```csharp C#
+var response = await http.GetAsync("v1/legal-entity/system");
+var envelope = await response.Content.ReadFromJsonAsync<TafSingle<LegalEntity>>();
+
+var currency = envelope.Properties.CurrencyISO;
+```
+
+```python Python
+response = client.get("/v1/legal-entity/system")
+response.raise_for_status()
+
+system = response.json()["Properties"]
+currency = system.get("CurrencyISO")
+```
+
+```javascript JavaScript
+const response = await fetch(`${baseUrl}/v1/legal-entity/system`, {
+  headers: { Authorization: `Bearer ${token}` },
+});
+
+const { Properties } = await response.json();
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json 200
+{
+  "Properties": {
+    "LegalEntityID": 1,
+    "ID": "3c4d5e6f-7a8b-4c9d-0e1f-2a3b4c5d6e7f",
+    "Name": "Acme A/S",
+    "IsActive": true,
+    "CurrencyISO": "DKK",
+    "CountryISO": "DK",
+    "IsSystemLegalEntity": true
+  },
+  "Links": [],
+  "Actions": []
+}
+```
+
+</ResponseExample>

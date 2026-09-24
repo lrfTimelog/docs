@@ -1,0 +1,120 @@
+---
+title: "Errors"
+description: "Status codes, the error body, and how to tell the failure modes apart"
+icon: "triangle-exclamation"
+---
+
+## Status codes
+
+| Code | Meaning | What to do |
+| --- | --- | --- |
+| `200` | Success. Body is a [TAF envelope](/api-reference/response-format), or literal `null` on some writes. | — |
+| `400` | The request was malformed — usually a path or query parameter that is not the expected type. | Fix the request. Do not retry unchanged. |
+| `401` | Authentication failed. | See below — it is ambiguous by design. |
+| `404` | The resource does not exist, or the period returned nothing. | Do not retry unchanged. |
+| `500` | The operation failed server-side. Carries a `ResponseError` body on the user endpoints. | Read `Message`. Safe to retry only for transient causes. |
+
+## The 401 is ambiguous
+
+<Warning>
+  TimeLog returns the same `401` whether the **token** is invalid or expired, the
+  **instance** number is wrong, or the **account** name is wrong. The response does not
+  say which.
+</Warning>
+
+Work through it in this order — the cheap checks first:
+
+<Steps>
+  <Step title="Check the account segment">
+    The most common cause, and the one that looks least like an auth failure. It is
+    case-sensitive and must match the segment in your TimeLog address exactly.
+  </Step>
+  <Step title="Check the instance number">
+    `app3` and `app13` are different sites. A wrong-but-existing instance authenticates
+    against a site your token has no account on.
+  </Step>
+  <Step title="Check the token">
+    Tokens expire — up to two years, and the expiry is set at creation. Re-issue from
+    **Settings → Personal settings → Personal access tokens**.
+  </Step>
+  <Step title="Check the role">
+    If the token was issued before the Integration privilege was granted to the user's
+    role, re-issue it after the grant.
+  </Step>
+</Steps>
+
+## The error body
+
+`500` responses on the user endpoints return a `ResponseError`. Other status codes return
+no documented body.
+
+```json
+{
+  "Code": 4001,
+  "Message": "User could not be created",
+  "Details": [],
+  "Parameters": null,
+  "Url": null,
+  "DeveloperNote": null
+}
+```
+
+<ResponseField name="Code" type="integer">
+  TimeLog's internal error code.
+</ResponseField>
+<ResponseField name="Message" type="string">
+  Human-readable description of the failure. The field worth logging.
+</ResponseField>
+<ResponseField name="Details" type="array">
+  Additional context. Free-form JSON values.
+</ResponseField>
+<ResponseField name="Parameters" type="string">
+  Parameters relevant to the error.
+</ResponseField>
+<ResponseField name="Url" type="string">
+  A URL relevant to the error.
+</ResponseField>
+<ResponseField name="DeveloperNote">
+  Free-form JSON value.
+</ResponseField>
+
+## Which endpoints return what
+
+The error surface is not uniform across the Organization endpoints. Handle what each one
+actually returns.
+
+| Endpoint | `400` | `401` | `404` | `500` |
+| --- | :---: | :---: | :---: | :---: |
+| `GET /v1/department` | | Yes | | |
+| `GET /v1/employee-projection/get-in-period` | | | Yes | |
+| `GET /v1/legal-entity` | | Yes | | |
+| `GET /v1/legal-entity/system` | | Yes | | |
+| `GET /v1/legal-entity/{legalEntityId}` | Yes | Yes | | |
+| `GET /v1/user` | | Yes | | |
+| `PUT /v1/user` | | Yes | | Yes |
+| `POST /v1/user/create` | Yes | Yes | | Yes |
+| `GET /v1/user/me` | | Yes | | |
+| `POST /v1/user/validate-new-user` | Yes | Yes | | Yes |
+| `GET /v1/user/{id}` | | Yes | Yes | Yes |
+| `GET /v2/users/me` | | Yes | | |
+
+<Note>
+  `GET /v1/employee-projection/get-in-period` is the one endpoint with **no documented
+  `401`**. Do not read that as unauthenticated access — it is a gap in the contract, not a
+  guarantee. Handle `401` on it anyway.
+</Note>
+
+## Retry guidance
+
+The read endpoints are safe to retry. Among the writes:
+
+| Endpoint | Safe to retry |
+| --- | --- |
+| `PUT /v1/user` | Yes — idempotent, the same payload produces the same end state. |
+| `POST /v1/user/validate-new-user` | Yes — it writes nothing. |
+| `POST /v1/user/create` | **No.** Not idempotent. A retry after an ambiguous failure can create a second user. |
+
+<Warning>
+  If `POST /v1/user/create` fails without a clear `ResponseError`, verify with
+  [Get all users](/api-reference/users/list) before retrying.
+</Warning>

@@ -1,0 +1,140 @@
+---
+title: "Get all users"
+description: "Retrieve every user in the organization"
+---
+
+```http
+GET /v1/user
+```
+
+Returns every user on the site. "User" here covers more than employees — API users,
+external resources and anonymised former employees are all users, distinguished by their
+user type. See [User types](#user-types) below.
+
+## Authorization
+
+<ParamField header="Authorization" type="string" required>
+  `Bearer <personal access token>`. See [Authentication](/api-reference/authentication).
+</ParamField>
+
+<Note>
+  A token carries exactly the permissions of the user who created it. This endpoint
+  returns what **that** user is allowed to see, which on a permission-restricted account
+  is not the whole organization.
+</Note>
+
+## Response
+
+`200` — a [collection envelope](/api-reference/response-format#collection).
+
+<ResponseField name="Properties" type="object">
+  Paging counters, serialised as strings.
+</ResponseField>
+
+<ResponseField name="Entities" type="object[]">
+  One entry per user. Omitted entirely if there are none.
+</ResponseField>
+
+<Warning>
+  **The user payload is not specified in the API contract.** `UserApiReadModel` exposes no
+  documented fields, so the shape under each `Entities[].Properties` cannot be stated
+  here. Inspect a live response from your own site before mapping it, and do not assume
+  it matches the `v2` model.
+
+  If you need a user model you can bind to, use
+  [Get the current user (v2)](/api-reference/users/get-current-v2) — `UsersApiReadModel`
+  **is** specified. It covers only the signed-in user, so it is not a substitute for this
+  endpoint, but it is the reference for what a TimeLog user looks like.
+</Warning>
+
+## User types
+
+User type is returned as an integer, not a string.
+
+| Value | Name | Meaning |
+| --- | --- | --- |
+| `-1` | `All` | Filter value meaning "any type". Not a type a user has. |
+| `0` | `Employee` | A normal employee. |
+| `1` | `ApiUser` | A service account used by an integration. |
+| `2` | `ExternalRessource` | An external contributor — note the spelling, it is `Ressource` in the API. |
+| `3` | `AnonymizedEmployee` | A former employee whose personal data has been anonymised. |
+
+<Warning>
+  Filter out `AnonymizedEmployee` (`3`) before syncing users into another system. Those
+  records exist to preserve historical time registrations after a GDPR erasure — pushing
+  them into a CRM or directory re-creates identities that were deliberately removed.
+</Warning>
+
+## Errors
+
+| Code | Cause |
+| --- | --- |
+| `401` | Invalid authentication token, wrong instance, or wrong account. See [Errors](/api-reference/errors). |
+
+<RequestExample>
+
+```bash cURL
+curl https://app3.timelog.com/acme/api/v1/user \
+  -H "Authorization: Bearer $TIMELOG_TOKEN"
+```
+
+```csharp C#
+var response = await http.GetAsync("v1/user");
+
+// The payload shape is unspecified - read it loosely until you have verified
+// it against your own site.
+using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+
+var users = document.RootElement.TryGetProperty("Entities", out var entities)
+    ? entities.EnumerateArray().Select(e => e.GetProperty("Properties")).ToList()
+    : new List<JsonElement>();
+```
+
+```python Python
+response = client.get("/v1/user")
+response.raise_for_status()
+
+users = [e["Properties"] for e in response.json().get("Entities", [])]
+
+# Never sync anonymised former employees onward.
+syncable = [u for u in users if u.get("EmployeeType") != 3]
+```
+
+```javascript JavaScript
+const response = await fetch(`${baseUrl}/v1/user`, {
+  headers: { Authorization: `Bearer ${token}` },
+});
+
+const { Entities = [] } = await response.json();
+const users = Entities.map((e) => e.Properties);
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json 200
+{
+  "Properties": {
+    "PageNumber": "1",
+    "TotalPage": "1",
+    "TotalRecord": "2"
+  },
+  "Entities": [
+    {
+      "Properties": {},
+      "Links": [],
+      "Actions": []
+    },
+    {
+      "Properties": {},
+      "Links": [],
+      "Actions": []
+    }
+  ],
+  "Links": [],
+  "Actions": []
+}
+```
+
+</ResponseExample>

@@ -1,0 +1,172 @@
+---
+title: "Update a user"
+description: "Change an existing user's information"
+---
+
+```http
+PUT /v1/user
+```
+
+Updates an existing user. The user being updated is identified inside the body, not in
+the path — this endpoint shares its path with
+[Get all users](/api-reference/users/list) and differs only by method.
+
+<Warning>
+  **The request model is not specified in the API contract.** `UserUpdateModel` exposes no
+  documented fields, so the exact payload this endpoint accepts cannot be stated here.
+
+  In practice it is the user model — see
+  [Create a user](/api-reference/users/create#body) for the field list — with `UserId`
+  identifying the target. Verify against a sandbox site before putting this in
+  production.
+</Warning>
+
+## Authorization
+
+<ParamField header="Authorization" type="string" required>
+  `Bearer <personal access token>`. See [Authentication](/api-reference/authentication).
+</ParamField>
+
+<Note>
+  Updating other users requires an administrative role. A token created from a normal
+  employee account will not have it.
+</Note>
+
+## Body
+
+`application/json`, required. The model is `UserUpdateModel`.
+
+<ParamField body="UserId" type="integer">
+  The user to update. Identifiers come from
+  [Get all users](/api-reference/users/list) or
+  [Get the current user (v2)](/api-reference/users/get-current-v2).
+</ParamField>
+
+<Note>
+  Because the model is unspecified, assume `PUT` semantics: send the **complete** user,
+  not just the fields you are changing. Read the user first, modify the object you got
+  back, and send that. A partial body risks clearing the fields you omitted.
+</Note>
+
+## Response
+
+`200` — the update succeeded.
+
+<Warning>
+  **The body is literal `null`, not the updated user.** The action returns a success result
+  that serialises the default of the read model. If you need the post-update state, read
+  the user back.
+
+  ```json
+  null
+  ```
+</Warning>
+
+## Errors
+
+| Code | Cause |
+| --- | --- |
+| `401` | Invalid authentication token, wrong instance, or wrong account. |
+| `500` | The update failed. Carries a [`ResponseError`](/api-reference/errors#the-error-body) body. |
+
+<Note>
+  There is no documented `400` and no documented `404`. An unknown `UserId` is not
+  guaranteed to produce either — confirm the user exists before updating, and read back
+  after, rather than inferring success from the status code alone.
+</Note>
+
+<Tip>
+  This operation **is** idempotent: sending the same payload twice leaves the same end
+  state. Safe to retry on a transient failure — unlike
+  [Create a user](/api-reference/users/create).
+</Tip>
+
+<RequestExample>
+
+```bash cURL
+curl -X PUT https://app3.timelog.com/acme/api/v1/user \
+  -H "Authorization: Bearer $TIMELOG_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "UserId": 1235,
+    "UserName": "ada.lovelace",
+    "FirstName": "Ada",
+    "LastName": "Lovelace",
+    "Initials": "AL",
+    "Language": 2,
+    "EmployeeType": 0,
+    "DepartmentID": 9,
+    "IsActive": true
+  }'
+```
+
+```csharp C#
+// Read, modify, send back - the model is unspecified, so send the whole user.
+var current = await http.GetFromJsonAsync<TafSingle<JsonObject>>("v1/user/1235");
+var user = current!.Properties!;
+
+user["DepartmentID"] = 9;
+
+var response = await http.PutAsJsonAsync("v1/user", user);
+response.EnsureSuccessStatusCode();   // body is null - do not deserialise it
+
+// Read back to confirm.
+var updated = await http.GetFromJsonAsync<TafSingle<JsonObject>>("v1/user/1235");
+```
+
+```python Python
+# Read, modify, send back - the model is unspecified, so send the whole user.
+user = client.get("/v1/user/1235").json()["Properties"]
+user["DepartmentID"] = 9
+
+response = client.put("/v1/user", json=user)
+if response.status_code == 500:
+    raise RuntimeError(response.json()["Message"])
+response.raise_for_status()   # body is null - nothing to parse
+
+# Read back to confirm.
+updated = client.get("/v1/user/1235").json()["Properties"]
+```
+
+```javascript JavaScript
+const headers = {
+  Authorization: `Bearer ${token}`,
+  "Content-Type": "application/json",
+};
+
+// Read, modify, send back.
+const { Properties: user } = await (
+  await fetch(`${baseUrl}/v1/user/1235`, { headers })
+).json();
+
+user.DepartmentID = 9;
+
+const response = await fetch(`${baseUrl}/v1/user`, {
+  method: "PUT",
+  headers,
+  body: JSON.stringify(user),
+});
+
+if (!response.ok) throw new Error(`Update failed: ${response.status}`);
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json 200
+null
+```
+
+```json 500
+{
+  "Code": 4005,
+  "Message": "User could not be updated",
+  "Details": [],
+  "Parameters": null,
+  "Url": null,
+  "DeveloperNote": null
+}
+```
+
+</ResponseExample>

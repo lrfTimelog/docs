@@ -1,0 +1,159 @@
+---
+title: "Get the current user (v2)"
+description: "Retrieve the signed-in user with a fully specified model"
+---
+
+```http
+GET /v2/users/me
+```
+
+Returns the user the personal access token belongs to, as `UsersApiReadModel` — the one
+fully specified user model in this API. It carries the fields an integration usually
+needs: name, email, initials, user type and legal entity.
+
+<Note>
+  This is **not** a replacement for [`GET /v1/user/me`](/api-reference/users/get-current).
+  `v1` and `v2` are both current and return different models; the version sits in the path
+  and is decided per endpoint. Where you need a typed user, use this one.
+</Note>
+
+## Authorization
+
+<ParamField header="Authorization" type="string" required>
+  `Bearer <personal access token>`. See [Authentication](/api-reference/authentication).
+</ParamField>
+
+## Response
+
+`200` — a [single-resource envelope](/api-reference/response-format#single-resource).
+
+<ResponseField name="Properties" type="object">
+  The signed-in user.
+
+  <Expandable title="properties" defaultOpen>
+    <ResponseField name="UserId" type="integer">
+      The user identifier. The value other endpoints expect, including
+      [Get a user by ID](/api-reference/users/get-by-id).
+    </ResponseField>
+    <ResponseField name="Id" type="string">
+      GUID form of the identifier.
+    </ResponseField>
+    <ResponseField name="FullName" type="string">
+      Display name.
+    </ResponseField>
+    <ResponseField name="FirstName" type="string">
+    </ResponseField>
+    <ResponseField name="LastName" type="string">
+    </ResponseField>
+    <ResponseField name="Initials" type="string">
+      The user's initials as maintained in TimeLog.
+    </ResponseField>
+    <ResponseField name="Email" type="string">
+      The user's email address.
+    </ResponseField>
+    <ResponseField name="IsActive" type="boolean">
+      Whether the user is active.
+    </ResponseField>
+    <ResponseField name="UserType" type="integer">
+      User type as an integer — `0` Employee, `1` ApiUser, `2` ExternalRessource,
+      `3` AnonymizedEmployee. See [User types](/api-reference/users/list#user-types).
+    </ResponseField>
+    <ResponseField name="ProfilePicture" type="string">
+      URL to the user's profile picture.
+    </ResponseField>
+    <ResponseField name="LegalEntityId" type="integer">
+      The legal entity the user belongs to. Resolve through
+      [Get all legal entities](/api-reference/legal-entities/list).
+    </ResponseField>
+    <ResponseField name="LegalEntityName" type="string">
+      Name of that legal entity, denormalised onto the user.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="Links" type="TafLink[]">
+</ResponseField>
+
+<ResponseField name="Actions" type="TafAction[]">
+</ResponseField>
+
+## Errors
+
+| Code | Cause |
+| --- | --- |
+| `401` | Invalid authentication token, wrong instance, or wrong account. See [Errors](/api-reference/errors). |
+
+<Tip>
+  `LegalEntityId` on the signed-in user tells you which entity an integration is operating
+  under — and therefore which currency its amounts are denominated in on a multi-entity
+  site.
+</Tip>
+
+<RequestExample>
+
+```bash cURL
+curl https://app3.timelog.com/acme/api/v2/users/me \
+  -H "Authorization: Bearer $TIMELOG_TOKEN"
+```
+
+```csharp C#
+public sealed record CurrentUser(
+    int UserId,
+    Guid Id,
+    string FullName,
+    string Email,
+    string Initials,
+    bool IsActive,
+    int UserType,
+    int LegalEntityId,
+    string LegalEntityName);
+
+var response = await http.GetAsync("v2/users/me");
+response.EnsureSuccessStatusCode();
+
+var envelope = await response.Content.ReadFromJsonAsync<TafSingle<CurrentUser>>();
+var me = envelope!.Properties;
+```
+
+```python Python
+response = client.get("/v2/users/me")
+response.raise_for_status()
+
+me = response.json()["Properties"]
+print(me["FullName"], me["Email"], me["LegalEntityName"])
+```
+
+```javascript JavaScript
+const response = await fetch(`${baseUrl}/v2/users/me`, {
+  headers: { Authorization: `Bearer ${token}` },
+});
+
+const { Properties: me } = await response.json();
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json 200
+{
+  "Properties": {
+    "UserId": 1234,
+    "Id": "5e6f7a8b-9c0d-4e1f-2a3b-4c5d6e7f8a9b",
+    "FullName": "Ada Lovelace",
+    "FirstName": "Ada",
+    "LastName": "Lovelace",
+    "Initials": "AL",
+    "Email": "ada@acme.com",
+    "IsActive": true,
+    "UserType": 0,
+    "ProfilePicture": "https://app3.timelog.com/acme/images/users/1234.png",
+    "LegalEntityId": 1,
+    "LegalEntityName": "Acme A/S"
+  },
+  "Links": [],
+  "Actions": []
+}
+```
+
+</ResponseExample>
