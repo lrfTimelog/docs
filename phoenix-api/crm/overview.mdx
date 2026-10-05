@@ -1,0 +1,44 @@
+---
+title: "D1 · CRM"
+sidebarTitle: "Overview"
+description: "Who we sell to, and the people at them. Customers, contacts, industry, customer status."
+icon: "handshake"
+---
+<Warning>
+**POC · work in progress.** This is a draft `/v1` contract rendered for presentation. The endpoints are not live, and names, fields and base URLs can still change before the contract freeze.
+</Warning>
+
+## Methods
+
+10 operations are declared in the draft contract for this domain.
+
+| Method | Endpoint | What it does |
+|---|---|---|
+| `GET` | [`/v1/customers`](/phoenix-api/crm/list-customers) | List or search customers |
+| `POST` | [`/v1/customers`](/phoenix-api/crm/create-customer) | Create a customer, supplier or lead |
+| `GET` | [`/v1/customers/ext:{ns}:{key}`](/phoenix-api/crm/get-customer-by-external-id) | Get a customer by your own key |
+| `PUT` | [`/v1/customers/ext:{ns}:{key}`](/phoenix-api/crm/upsert-customer-by-external-id) | Create or update a customer by your own key |
+| `GET` | [`/v1/customers/{id}`](/phoenix-api/crm/get-customer) | Get one customer |
+| `PATCH` | [`/v1/customers/{id}`](/phoenix-api/crm/update-customer) | Change some fields of a customer |
+| `DELETE` | [`/v1/customers/{id}`](/phoenix-api/crm/delete-customer) | Delete a customer that nothing references |
+| `POST` | [`/v1/customers/{id}:mark-merged`](/phoenix-api/crm/mark-customer-merged) | Mark a customer as merged into a survivor |
+| `GET` | [`/v1/customer-statuses`](/phoenix-api/crm/list-customer-statuses) | List customer status labels |
+| `GET` | [`/v1/customer-statuses/{id}`](/phoenix-api/crm/get-customer-status) | Get one customer status label |
+
+## Events
+
+| Event | When it fires |
+|---|---|
+| [`customer.created`](/phoenix-api/crm/events/customer-created) | A customer, supplier or lead now exists |
+| [`customer.updated`](/phoenix-api/crm/events/customer-updated) | Public customer fields changed |
+| [`customer.status_changed`](/phoenix-api/crm/events/customer-status-changed) | The customer's status label changed |
+| [`customer.merged`](/phoenix-api/crm/events/customer-merged) | A customer was marked as merged into a survivor |
+| [`customer.deleted`](/phoenix-api/crm/events/customer-deleted) | A customer was deleted |
+
+## Planned next in this domain
+
+From the target API model. Not yet specified as a contract.
+
+| Resource | Type | Priority | Purpose |
+|---|---|---|---|
+| `contacts` | Resource | MUST | A person at a customer; target of CRM contact sync and project / invoice contact references. |

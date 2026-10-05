@@ -1,0 +1,92 @@
+---
+title: "TimeLog Phoenix Public REST API"
+sidebarTitle: "Introduction"
+description: "The next-generation TimeLog public API, organised by business domain."
+icon: "flask"
+---
+<Warning>
+**POC · work in progress.** This is a draft `/v1` contract rendered for presentation. The endpoints are not live, and names, fields and base URLs can still change before the contract freeze.
+</Warning>
+
+The Phoenix Public REST API is one versioned API for every TimeLog business domain. It is designed for
+external developers first: predictable resource names, one error shape, cursor pagination and signed events.
+
+This reference is organised the way the business is: **domain → methods**. 12 domains are listed;
+4 have a draft contract today (41 methods, 14 events). The rest are shown as planned, so you can see
+the full scope of the API.
+
+## Base URL
+
+```bash
+https://api.timelog.com/v1
+```
+
+| Environment | Base URL |
+|---|---|
+| Production | `https://api.timelog.com/v1` |
+| Sandbox | `https://api.sandbox.timelog.com/v1` |
+
+The tenant is derived from your credential, so the URL is the same for every customer.
+
+## Authentication
+
+Send a bearer token on every request.
+
+```bash
+curl https://api.timelog.com/v1/customers \
+  -H "Authorization: Bearer $TIMELOG_API_TOKEN"
+```
+
+## Conventions at a glance
+
+| Topic | Convention |
+|---|---|
+| Ids | `<prefix>_<ULID>`, one prefix per type, for example `cus_` and `prj_` |
+| Your own keys | `GET` and `PUT /v1/<resource>/ext:{ns}:{key}` look up or upsert by your system's id |
+| Values | `snake_case` fields, RFC 3339 UTC timestamps, `YYYY-MM-DD` dates |
+| Lists | `{ data, meta: { next_cursor, has_more } }`, keyset cursor, default 50, max 100 |
+| Writes | `Idempotency-Key` header, `ETag` / `If-Match` for safe updates |
+| Errors | One problem shape with a stable `code` and a `retryable` flag |
+| Rate limits | `RateLimit-*` headers on every response, `429` with `Retry-After` |
+| Events | Thin, signed, at-least-once webhooks delivered after commit |
+
+## Domains
+
+<CardGroup cols={2}>
+  <Card title="D1 · CRM" icon="handshake" href="/phoenix-api/crm/overview">
+    10 methods. Who we sell to, and the people at them. Customers, contacts, industry, customer status.
+  </Card>
+  <Card title="D2 · Delivery" icon="diagram-project" href="/phoenix-api/delivery/overview">
+    24 methods. The work we committed to do: projects, tasks, sub-tasks, templates, milestones, stages, project types and categories.
+  </Card>
+  <Card title="D3 · Commercial terms" icon="file-contract" href="/phoenix-api/commercial-terms/overview">
+    Planned. How a piece of delivery converts into money: contract models, hourly rates, cost prices, payment plans, payors.
+  </Card>
+  <Card title="D4 · Time" icon="clock" href="/phoenix-api/time/overview">
+    4 methods. Recording that work happened: time registrations, time trackers, favourites, weekly registrations, adjustments.
+  </Card>
+  <Card title="D5 · Approval and period" icon="circle-check" href="/phoenix-api/approval-and-period/overview">
+    Planned. Turning recorded time into settled time: timesheet submission, approval, rejection, resubmission, period close, barriers.
+  </Card>
+  <Card title="D6 · Expense and mileage" icon="receipt" href="/phoenix-api/expense-and-mileage/overview">
+    Planned. Money spent doing the work: employee expenses, project expenses, mileage, cars, payment methods, expense types, receipts.
+  </Card>
+  <Card title="D7 · Billing" icon="file-invoice-dollar" href="/phoenix-api/billing/overview">
+    Planned. Turning settled work into a receivable: invoices, lines, credit notes, booking, invoicing potential.
+  </Card>
+  <Card title="D8 · People" icon="users" href="/phoenix-api/people/overview">
+    Planned. The company and who is in it: employees, departments, legal entities, users, roles, licences, working time, competences.
+  </Card>
+  <Card title="D9 · Planning" icon="calendar-days" href="/phoenix-api/planning/overview">
+    3 methods. Forward-looking capacity: who is planned onto what, when, and how much is left.
+  </Card>
+  <Card title="D10 · Payroll and absence" icon="money-check-dollar" href="/phoenix-api/payroll-and-absence/overview">
+    Planned. Salary accounts, groups, postings, allowance legislation, holiday calendars, absence codes.
+  </Card>
+  <Card title="D11 · Extensibility" icon="plug" href="/phoenix-api/extensibility/overview">
+    Planned. The seams: custom fields, external keys and links, external systems, integration conflicts, the change log.
+  </Card>
+  <Card title="D12 · Reporting" icon="chart-line" href="/phoenix-api/reporting/overview">
+    Planned. Reading the business back: reports, KPIs, widgets and dashboards.
+  </Card>
+</CardGroup>

@@ -1,0 +1,29 @@
+---
+title: "D9 · Planning"
+sidebarTitle: "Overview"
+description: "Forward-looking capacity: who is planned onto what, when, and how much is left."
+icon: "calendar-days"
+---
+<Warning>
+**POC · work in progress.** This is a draft `/v1` contract rendered for presentation. The endpoints are not live, and names, fields and base URLs can still change before the contract freeze.
+</Warning>
+
+## Methods
+
+3 operations are declared in the draft contract for this domain.
+
+| Method | Endpoint | What it does |
+|---|---|---|
+| `GET` | [`/v1/bookings`](/phoenix-api/planning/list-bookings) | List booking shares in a date window |
+| `GET` | [`/v1/bookings/{id}`](/phoenix-api/planning/get-booking) | Get one booking share |
+| `PUT` | [`/v1/bookings/by-day`](/phoenix-api/planning/set-booking-share-by-day) | Set your source's share of one day |
+
+## Planned next in this domain
+
+From the target API model. Not yet specified as a contract.
+
+| Resource | Type | Priority | Purpose |
+|---|---|---|---|
+| `allocations` | Resource | MUST | An employee staffed on a task, with planned hours, a period, a status and the rate that will price their |
+| `capacity` | View | SHOULD | Available working hours per employee per period: normal working time − public holidays − capacity-deducting |
+| `workload` | View | SHOULD | Committed load against capacity per employee × period (SC-29, RM). |

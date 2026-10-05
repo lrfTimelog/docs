@@ -1,0 +1,26 @@
+---
+title: "D3 · Commercial terms"
+sidebarTitle: "Overview"
+description: "How a piece of delivery converts into money: contract models, hourly rates, cost prices, payment plans, payors."
+icon: "file-contract"
+tag: "Planned"
+---
+<Warning>
+**POC · work in progress.** This is a draft `/v1` contract rendered for presentation. The endpoints are not live, and names, fields and base URLs can still change before the contract freeze.
+</Warning>
+
+<Info>No methods are declared for this domain yet. It is listed so the full shape of the API is visible.</Info>
+
+## Planned resources
+
+From the target API model. Not yet specified as a contract.
+
+| Resource | Type | Priority | Purpose |
+|---|---|---|---|
+| `contracts` | Resource | MUST | The commercial terms under a project: how work is billed. |
+| `contract-rates` | Resource | MUST | The hourly rates one contract charges (a frozen copy of the price list taken at contract create), with |
+| `price-lists` | Resource | SHOULD | The tenant's standard and customer price lists that new contracts copy from (rate-card lookup for CRM |
+| `contract-payments` | Resource | SHOULD | A contract's instalment schedule (fixed-price milestones, prepaid blocks, recurring periods, per-task T&M |
+| `cost-rates` | Resource | SHOULD | An employee's internal cost per hour over time, for margin, project financials and ERP cost export. |
+| `contract-models` | View | SHOULD | Which contract models exist, which the API can create, and which this tenant may create — before trying |
+| `contract-burns` | View | SHOULD | Budget vs actuals per contract, computed server-side, so automation and agents stop summing time entries |

@@ -1,0 +1,22 @@
+---
+title: "D7 · Billing"
+sidebarTitle: "Overview"
+description: "Turning settled work into a receivable: invoices, lines, credit notes, booking, invoicing potential."
+icon: "file-invoice-dollar"
+tag: "Planned"
+---
+<Warning>
+**POC · work in progress.** This is a draft `/v1` contract rendered for presentation. The endpoints are not live, and names, fields and base URLs can still change before the contract freeze.
+</Warning>
+
+<Info>No methods are declared for this domain yet. It is listed so the full shape of the API is visible.</Info>
+
+## Planned resources
+
+From the target API model. Not yet specified as a contract.
+
+| Resource | Type | Priority | Purpose |
+|---|---|---|---|
+| `invoices` | Resource | MUST | A customer invoice (`InvoiceType = 1`), draft or booked, with embedded lines, for ERP posting, |
+| `credit-notes` | Resource | MUST | A credit note (`InvoiceType = 2`) reversing a booked invoice, posted by ERPs as its own document (PD-034). |
+| `billable-items` | View | SHOULD | Uninvoiced billable work (invoicing potential) per project/customer/period: "what can we invoice" |

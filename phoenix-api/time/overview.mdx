@@ -1,0 +1,28 @@
+---
+title: "D4 · Time"
+sidebarTitle: "Overview"
+description: "Recording that work happened: time registrations, time trackers, favourites, weekly registrations, adjustments."
+icon: "clock"
+---
+<Warning>
+**POC · work in progress.** This is a draft `/v1` contract rendered for presentation. The endpoints are not live, and names, fields and base URLs can still change before the contract freeze.
+</Warning>
+
+## Methods
+
+4 operations are declared in the draft contract for this domain.
+
+| Method | Endpoint | What it does |
+|---|---|---|
+| `GET` | [`/v1/calendar-events`](/phoenix-api/time/list-calendar-events) | List calendar events in a window |
+| `GET` | [`/v1/calendar-events/{id}`](/phoenix-api/time/get-calendar-event) | Get one calendar event |
+| `POST` | [`/v1/time-entries`](/phoenix-api/time/create-time-entry) | Register time (optionally from a calendar event) |
+| `PUT` | [`/v1/time-entries/ext:{ns}:{key}`](/phoenix-api/time/upsert-time-entry-by-external-id) | Create or update a time entry by your own key |
+
+## Planned next in this domain
+
+From the target API model. Not yet specified as a contract.
+
+| Resource | Type | Priority | Purpose |
+|---|---|---|---|
+| `employees/{id}/registration-targets` | View | SHOULD | "Where may this person register time on date D, and if not, why?" — the picklist for apps and agents, |

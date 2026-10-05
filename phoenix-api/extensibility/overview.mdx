@@ -1,0 +1,22 @@
+---
+title: "D11 · Extensibility"
+sidebarTitle: "Overview"
+description: "The seams: custom fields, external keys and links, external systems, integration conflicts, the change log."
+icon: "plug"
+tag: "Planned"
+---
+<Warning>
+**POC · work in progress.** This is a draft `/v1` contract rendered for presentation. The endpoints are not live, and names, fields and base URLs can still change before the contract freeze.
+</Warning>
+
+<Info>No methods are declared for this domain yet. It is listed so the full shape of the API is visible.</Info>
+
+## Planned resources
+
+From the target API model. Not yet specified as a contract.
+
+| Resource | Type | Priority | Purpose |
+|---|---|---|---|
+| `links` | Resource | MUST | The mapping between a TimeLog record and a key in a connected system. |
+| `external-systems` | Resource | SHOULD | The connected systems registered in the tenant. |
+| `custom-fields` | Resource | SHOULD | The tenant-defined fields per resource type, with type and allowed values, so iPaaS, CRM mapping and |

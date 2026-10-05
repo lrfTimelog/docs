@@ -1,0 +1,28 @@
+---
+title: "D10 · Payroll and absence"
+sidebarTitle: "Overview"
+description: "Salary accounts, groups, postings, allowance legislation, holiday calendars, absence codes."
+icon: "money-check-dollar"
+tag: "Planned"
+---
+<Warning>
+**POC · work in progress.** This is a draft `/v1` contract rendered for presentation. The endpoints are not live, and names, fields and base URLs can still change before the contract freeze.
+</Warning>
+
+<Info>No methods are declared for this domain yet. It is listed so the full shape of the API is visible.</Info>
+
+## Planned resources
+
+From the target API model. Not yet specified as a contract.
+
+| Resource | Type | Priority | Purpose |
+|---|---|---|---|
+| `absences` | Resource | MUST | A period an employee is away (vacation, sickness, unpaid leave …) on one absence code, with its approval |
+| `absence-codes` | Resource | MUST | The absence types an employee can register on, with the payroll semantics HRIS and payroll map against. |
+| `salary-accounts` | Resource | SHOULD | The payroll accounts (salary time, flex, absence balances) employees accrue on. |
+| `salary-postings` | Resource | SHOULD | The ledger of payroll quantities per employee × account × date, with typed sources. |
+| `salary-periods` | Resource | SHOULD | Pay-run periods per legal entity (and department), with status. |
+| `work-schedules` | Resource | SHOULD | Weekly normal working time patterns (hours per weekday), referenced by employees. |
+| `holiday-calendars` | Resource | SHOULD | Public-holiday calendars with their holidays, assigned to employees. |
+| `employees/{id}/salary-balances` | View | SHOULD | An employee's current balance per salary account (vacation, flex, illness). |
+| `salary-codes` | Resource | SHOULD | The pay codes (postables) payroll maps against, each with its group. |

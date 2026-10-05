@@ -1,0 +1,23 @@
+---
+title: "D6 · Expense and mileage"
+sidebarTitle: "Overview"
+description: "Money spent doing the work: employee expenses, project expenses, mileage, cars, payment methods, expense types, receipts."
+icon: "receipt"
+tag: "Planned"
+---
+<Warning>
+**POC · work in progress.** This is a draft `/v1` contract rendered for presentation. The endpoints are not live, and names, fields and base URLs can still change before the contract freeze.
+</Warning>
+
+<Info>No methods are declared for this domain yet. It is listed so the full shape of the API is visible.</Info>
+
+## Planned resources
+
+From the target API model. Not yet specified as a contract.
+
+| Resource | Type | Priority | Purpose |
+|---|---|---|---|
+| `expenses` | Resource | MUST | An out-of-pocket (`kind: employee`) or project cost (`kind: project`, typically a supplier invoice) for |
+| `expense-types` | Resource | SHOULD | The expense categories a consumer maps to and picks from (expense tools, ERP account mapping, payroll). |
+| `mileage-entries` | Resource | SHOULD | Distance driven for work, reimbursed to the employee through payroll and optionally rebilled. |
+| `mileage-rates` | Resource | SHOULD | The per-legal-entity rates mileage is reimbursed at, with their validity periods; payroll and expense |

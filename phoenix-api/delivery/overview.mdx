@@ -1,0 +1,64 @@
+---
+title: "D2 · Delivery"
+sidebarTitle: "Overview"
+description: "The work we committed to do: projects, tasks, sub-tasks, templates, milestones, stages, project types and categories."
+icon: "diagram-project"
+---
+<Warning>
+**POC · work in progress.** This is a draft `/v1` contract rendered for presentation. The endpoints are not live, and names, fields and base URLs can still change before the contract freeze.
+</Warning>
+
+## Methods
+
+24 operations are declared in the draft contract for this domain.
+
+| Method | Endpoint | What it does |
+|---|---|---|
+| `GET` | [`/v1/projects`](/phoenix-api/delivery/list-projects) | List or search projects |
+| `POST` | [`/v1/projects`](/phoenix-api/delivery/create-project) | Create a blank project |
+| `POST` | [`/v1/projects:from-template`](/phoenix-api/delivery/create-project-from-template) | Create a project from a template |
+| `GET` | [`/v1/projects/ext:{ns}:{key}`](/phoenix-api/delivery/get-project-by-external-id) | Get a project by your own key |
+| `PUT` | [`/v1/projects/ext:{ns}:{key}`](/phoenix-api/delivery/upsert-project-by-external-id) | Create (blank) or update a project by your own key |
+| `GET` | [`/v1/projects/{id}`](/phoenix-api/delivery/get-project) | Get one project |
+| `PATCH` | [`/v1/projects/{id}`](/phoenix-api/delivery/update-project) | Change some fields of a project |
+| `DELETE` | [`/v1/projects/{id}`](/phoenix-api/delivery/delete-project) | Delete a project that has no history |
+| `POST` | [`/v1/projects/{id}:requote`](/phoenix-api/delivery/requote-project) | Move a project back to quote |
+| `POST` | [`/v1/projects/{id}:approve`](/phoenix-api/delivery/approve-project) | Approve a project (deal accepted, delivery not started) |
+| `POST` | [`/v1/projects/{id}:start`](/phoenix-api/delivery/start-project) | Start delivery on a project |
+| `POST` | [`/v1/projects/{id}:hold`](/phoenix-api/delivery/hold-project) | Put a project on hold |
+| `POST` | [`/v1/projects/{id}:complete`](/phoenix-api/delivery/complete-project) | Complete a project |
+| `POST` | [`/v1/projects/{id}:archive`](/phoenix-api/delivery/archive-project) | Archive a project |
+| `POST` | [`/v1/projects/{id}:cancel`](/phoenix-api/delivery/cancel-project) | Cancel a project |
+| `POST` | [`/v1/projects/{id}:reopen`](/phoenix-api/delivery/reopen-project) | Reopen a closed or held project |
+| `GET` | [`/v1/project-templates`](/phoenix-api/delivery/list-project-templates) | List project templates |
+| `GET` | [`/v1/project-templates/{id}`](/phoenix-api/delivery/get-project-template) | Get one project template |
+| `GET` | [`/v1/project-types`](/phoenix-api/delivery/list-project-types) | List project types |
+| `GET` | [`/v1/project-types/{id}`](/phoenix-api/delivery/get-project-type) | Get one project type |
+| `GET` | [`/v1/project-categories`](/phoenix-api/delivery/list-project-categories) | List project categorys |
+| `GET` | [`/v1/project-categories/{id}`](/phoenix-api/delivery/get-project-category) | Get one project category |
+| `GET` | [`/v1/project-stages`](/phoenix-api/delivery/list-project-stages) | List project stages |
+| `GET` | [`/v1/project-stages/{id}`](/phoenix-api/delivery/get-project-stage) | Get one project stage |
+
+## Events
+
+| Event | When it fires |
+|---|---|
+| [`project.created`](/phoenix-api/delivery/events/project-created) | A project now exists, complete |
+| [`project.updated`](/phoenix-api/delivery/events/project-updated) | Public project fields changed (not a status move) |
+| [`project.status_changed`](/phoenix-api/delivery/events/project-status-changed) | Any lifecycle move |
+| [`project.started`](/phoenix-api/delivery/events/project-started) | Moved to in progress (open for delivery and time) |
+| [`project.completed`](/phoenix-api/delivery/events/project-completed) | Completed |
+| [`project.archived`](/phoenix-api/delivery/events/project-archived) | Archived |
+| [`project.cancelled`](/phoenix-api/delivery/events/project-cancelled) | Cancelled |
+| [`project.reopened`](/phoenix-api/delivery/events/project-reopened) | A closed or held project moved back to in progress |
+| [`project.deleted`](/phoenix-api/delivery/events/project-deleted) | A project was deleted |
+
+## Planned next in this domain
+
+From the target API model. Not yet specified as a contract.
+
+| Resource | Type | Priority | Purpose |
+|---|---|---|---|
+| `tasks` | Resource | MUST | A work-breakdown node under a project that time is registered on and that carries exactly one contract. |
+| `milestones` | Resource | SHOULD | Dated checkpoints on a project (portal and PM progress, SC-32). |
+| `project-members` | Resource | SHOULD | Who is on a project; on `project_members` registration-model projects, who may register time (BR-02). |

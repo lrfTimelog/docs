@@ -1,0 +1,23 @@
+---
+title: "D8 · People"
+sidebarTitle: "Overview"
+description: "The company and who is in it: employees, departments, legal entities, users, roles, licences, working time, competences."
+icon: "users"
+tag: "Planned"
+---
+<Warning>
+**POC · work in progress.** This is a draft `/v1` contract rendered for presentation. The endpoints are not live, and names, fields and base URLs can still change before the contract freeze.
+</Warning>
+
+<Info>No methods are declared for this domain yet. It is listed so the full shape of the API is visible.</Info>
+
+## Planned resources
+
+From the target API model. Not yet specified as a contract.
+
+| Resource | Type | Priority | Purpose |
+|---|---|---|---|
+| `employees` | Resource | MUST | One person who works in the tenant (employee + user + profile, always created together, A12 §0 `[v]`): |
+| `departments` | Resource | MUST | The organisational tree used for HRIS placement, row scoping and reporting (DM §4.25). |
+| `legal-entities` | Resource | MUST | The company that issues invoices, employs people and owns numbering; the ERP company-mapping key. |
+| `roles` | Resource | SHOULD | The shared permission roles and their named privileges, for IAM audits and IdP role mapping by name. |

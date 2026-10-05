@@ -64,6 +64,164 @@
           }
         ],
         "icon": "puzzle-piece"
+      },
+      {
+        "group": "TimeLog Phoenix Public REST API (POC · WIP)",
+        "icon": "flask",
+        "pages": [
+          "phoenix-api/index",
+          {
+            "group": "D1 · CRM",
+            "icon": "handshake",
+            "pages": [
+              "phoenix-api/crm/overview",
+              "phoenix-api/crm/list-customers",
+              "phoenix-api/crm/create-customer",
+              "phoenix-api/crm/get-customer-by-external-id",
+              "phoenix-api/crm/upsert-customer-by-external-id",
+              "phoenix-api/crm/get-customer",
+              "phoenix-api/crm/update-customer",
+              "phoenix-api/crm/delete-customer",
+              "phoenix-api/crm/mark-customer-merged",
+              "phoenix-api/crm/list-customer-statuses",
+              "phoenix-api/crm/get-customer-status",
+              {
+                "group": "Events",
+                "icon": "bolt",
+                "pages": [
+                  "phoenix-api/crm/events/customer-created",
+                  "phoenix-api/crm/events/customer-updated",
+                  "phoenix-api/crm/events/customer-status-changed",
+                  "phoenix-api/crm/events/customer-merged",
+                  "phoenix-api/crm/events/customer-deleted"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "D2 · Delivery",
+            "icon": "diagram-project",
+            "pages": [
+              "phoenix-api/delivery/overview",
+              "phoenix-api/delivery/list-projects",
+              "phoenix-api/delivery/create-project",
+              "phoenix-api/delivery/create-project-from-template",
+              "phoenix-api/delivery/get-project-by-external-id",
+              "phoenix-api/delivery/upsert-project-by-external-id",
+              "phoenix-api/delivery/get-project",
+              "phoenix-api/delivery/update-project",
+              "phoenix-api/delivery/delete-project",
+              "phoenix-api/delivery/requote-project",
+              "phoenix-api/delivery/approve-project",
+              "phoenix-api/delivery/start-project",
+              "phoenix-api/delivery/hold-project",
+              "phoenix-api/delivery/complete-project",
+              "phoenix-api/delivery/archive-project",
+              "phoenix-api/delivery/cancel-project",
+              "phoenix-api/delivery/reopen-project",
+              "phoenix-api/delivery/list-project-templates",
+              "phoenix-api/delivery/get-project-template",
+              "phoenix-api/delivery/list-project-types",
+              "phoenix-api/delivery/get-project-type",
+              "phoenix-api/delivery/list-project-categories",
+              "phoenix-api/delivery/get-project-category",
+              "phoenix-api/delivery/list-project-stages",
+              "phoenix-api/delivery/get-project-stage",
+              {
+                "group": "Events",
+                "icon": "bolt",
+                "pages": [
+                  "phoenix-api/delivery/events/project-created",
+                  "phoenix-api/delivery/events/project-updated",
+                  "phoenix-api/delivery/events/project-status-changed",
+                  "phoenix-api/delivery/events/project-started",
+                  "phoenix-api/delivery/events/project-completed",
+                  "phoenix-api/delivery/events/project-archived",
+                  "phoenix-api/delivery/events/project-cancelled",
+                  "phoenix-api/delivery/events/project-reopened",
+                  "phoenix-api/delivery/events/project-deleted"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "D3 · Commercial terms",
+            "icon": "file-contract",
+            "pages": [
+              "phoenix-api/commercial-terms/overview"
+            ]
+          },
+          {
+            "group": "D4 · Time",
+            "icon": "clock",
+            "pages": [
+              "phoenix-api/time/overview",
+              "phoenix-api/time/list-calendar-events",
+              "phoenix-api/time/get-calendar-event",
+              "phoenix-api/time/create-time-entry",
+              "phoenix-api/time/upsert-time-entry-by-external-id"
+            ]
+          },
+          {
+            "group": "D5 · Approval and period",
+            "icon": "circle-check",
+            "pages": [
+              "phoenix-api/approval-and-period/overview"
+            ]
+          },
+          {
+            "group": "D6 · Expense and mileage",
+            "icon": "receipt",
+            "pages": [
+              "phoenix-api/expense-and-mileage/overview"
+            ]
+          },
+          {
+            "group": "D7 · Billing",
+            "icon": "file-invoice-dollar",
+            "pages": [
+              "phoenix-api/billing/overview"
+            ]
+          },
+          {
+            "group": "D8 · People",
+            "icon": "users",
+            "pages": [
+              "phoenix-api/people/overview"
+            ]
+          },
+          {
+            "group": "D9 · Planning",
+            "icon": "calendar-days",
+            "pages": [
+              "phoenix-api/planning/overview",
+              "phoenix-api/planning/list-bookings",
+              "phoenix-api/planning/get-booking",
+              "phoenix-api/planning/set-booking-share-by-day"
+            ]
+          },
+          {
+            "group": "D10 · Payroll and absence",
+            "icon": "money-check-dollar",
+            "pages": [
+              "phoenix-api/payroll-and-absence/overview"
+            ]
+          },
+          {
+            "group": "D11 · Extensibility",
+            "icon": "plug",
+            "pages": [
+              "phoenix-api/extensibility/overview"
+            ]
+          },
+          {
+            "group": "D12 · Reporting",
+            "icon": "chart-line",
+            "pages": [
+              "phoenix-api/reporting/overview"
+            ]
+          }
+        ]
       }
     ]
   },
